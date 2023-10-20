@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\UserConstant\UserRole;
 use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -25,18 +26,18 @@ Route::get('/unauthorized', [AuthenController::class, 'throwAuthorError'])->name
 Route::group([
     'middleware' => 'auth:api',
 ], function ($router) {
+    Route::group([
+        'middleware' => 'author:' . UserRole::ADMIN,
+    ], function ($router) {
+        Route::get('/users', [UserController::class, 'index']);
+    });
+    
     Route::controller(AuthenController::class)->group(function () {
         Route::name('auth.')->group(function () {
             Route::post('/logout', 'logout')->name('logout');
             Route::post('/refresh', 'refresh')->name('refresh');
             Route::post('/change-pass', 'changePassWord')->name('changePassword');
             Route::get('/user-profile', 'getUserProfile')->name('getUserProfile');
-        });
-    });
-
-    Route::controller(UserController::class)->group(function () {
-        Route::name('user.')->group(function () {
-            Route::get('/users', 'index')->name('index');
         });
     });
 });
