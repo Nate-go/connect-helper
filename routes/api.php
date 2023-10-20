@@ -23,13 +23,12 @@ Route::get('/unauthenticated', [AuthenController::class, 'throwAuthenError'])->n
 Route::get('/unauthorized', [AuthenController::class, 'throwAuthorError'])->name('auth.authorError');
 
 
-Route::group([
-    'middleware' => 'auth:api',
-], function ($router) {
-    Route::group([
-        'middleware' => 'author:' . UserRole::ADMIN,
-    ], function ($router) {
-        Route::get('/users', [UserController::class, 'index']);
+Route::middleware('auth:api')->group(function() {
+    Route::middleware('author:' . UserRole::ADMIN)->group(function () {
+        Route::controller(UserController::class)->prefix('users')->group(function () {
+            Route::get('/', [UserController::class,'index'])->name('getAllUser');
+            
+        });
     });
     
     Route::controller(AuthenController::class)->group(function () {
