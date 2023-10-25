@@ -20,7 +20,7 @@ class AuthenService
     public function login($input) {
        
         if (!$token = auth()->attempt($input)) {
-            return response()->json(['error' => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
+            return response()->json(["message" => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
         }
 
         return $this->createNewToken($token);
@@ -86,7 +86,7 @@ class AuthenService
 
         if(!$verify_code ) {
             return response()->json([
-                'error' => 'Can not find out the email'
+                "message" => 'Can not find out the email'
             ], StatusResponse::ERROR);
         }
 
@@ -103,12 +103,12 @@ class AuthenService
 
     public function throwAuthenError()
     {
-        return response()->json(["error" => "Unauthenticated", "message" => "You need to login to access"], StatusResponse::UNAUTHORIZED);
+        return response()->json(["message" => "You need to login to access"], StatusResponse::UNAUTHORIZED);
     }
 
     public function throwAuthorError()
     {
-        return response()->json(["error" => "Unauthorized", "message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
+        return response()->json(["message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
     }
 
     public function refresh()
@@ -127,13 +127,13 @@ class AuthenService
 
         if($user->status == UserStatus::DEACTIVE) {
             return response()->json([
-                "error"=> "Your account is deactived"
+                "message"=> "Your account is deactived"
             ], StatusResponse::DEACTIVED_ACCOUNT);
         }
 
         if ($user->status == UserStatus::BLOCK) {
             return response()->json([
-                "error" => "Your account is blocked"
+                "message" => "Your account is blocked"
             ], StatusResponse::BLOCKED_ACCOUNT);
         }
 
