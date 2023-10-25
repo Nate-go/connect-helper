@@ -154,74 +154,59 @@ class AuthenService
             ->where('status', UserStatus::DEACTIVE)
             ->first();
 
-        if (!$user) {
-            return response()->json([
-                'message' => 'Can not find user or user is already active'
-            ], StatusResponse::ERROR);
+        $result = $this->checkVerifyAccount($user, $verify_code);
+        
+        if ($result) {
+            return $result;
         }
 
-        $accountVerify = AccountVerify::where('user_id', $user->id)
-            ->where('verify_code', $verify_code)
-            ->first();
-
-        if (!$accountVerify) {
-            return response()->json([
-                'message' => 'Your verify code is invalid'
-            ], StatusResponse::ERROR);
-        } 
-
-        if ($accountVerify->overtimed_at < now()) {
-            return response()->json([
-                'message' => 'Your verify code is expired'
-            ], StatusResponse::ERROR);
-        } 
-
         $user->status = UserStatus::ACTIVE;
+        $user->account_verify->delete();
         $user->save();
-
-        $accountVerify->delete();
 
         return response()->json([
             'message' => 'Activate account successfully'
         ], StatusResponse::SUCCESS);
     }
 
-    public function changePassword($input)
+    public function resetPassword($input)
     {
         $verify_code = $input['verify_code'];
         $newPassword = $input['new_password'];
 
         $user = auth()->user();
 
-        if (!$user or $user->status == UserStatus::DEACTIVE) {
-            return response()->json([
-                'message' => 'Can not find user or user is deactive'
-            ], StatusResponse::ERROR);
+        $result = $this->checkVerifyAccount($user, $verify_code);
+
+        if ($result) {
+            return $result;
         }
 
-        $accountVerify = AccountVerify::where('user_id', $user->id)
-            ->where('verify_code', $verify_code)
-            ->first();
-
-        if (!$accountVerify) {
-            return response()->json([
-                'message' => 'Your verify code is invalid'
-            ], StatusResponse::ERROR);
-        } 
-
-        if ($accountVerify->overtimed_at < now()) {
-            return response()->json([
-                'message' => 'Your verify code is expired'
-            ], StatusResponse::ERROR);
-        } 
-
         $user->password = bcrypt($newPassword);
+        $user->account_verify->delete();
         $user->save();
-
-        $accountVerify->delete();
 
         return response()->json([
             'message' => 'Change password successfully'
         ], StatusResponse::SUCCESS);
+    }
+
+    private function checkVerifyAccount($user, $verify_code)
+    {
+        if (!$user) {
+            return response()->json([
+                'message' => 'Can not find user or user is already active'
+            ], StatusResponse::ERROR);
+        }
+
+        $accountVerify = $user->account_verify;
+
+        if (!$accountVerify or $accountVerify->overtimed_at < now() or $accountVerify->verify_code != $verify_code) {
+            return response()->json([
+                'message' => 'Your verify code is invalid'
+            ], StatusResponse::ERROR);
+        }
+
+        return null;
     }
 }

@@ -36,7 +36,7 @@ Route::middleware('auth:api')->group(function() {
         Route::name('auth.')->group(function () {
             Route::post('/logout', 'logout')->name('logout');
             Route::post('/refresh', 'refresh')->name('refresh');
-            Route::post('/change-pass', 'changePassWord')->name('changePassword');
+            Route::post('/reset-pass', 'resetPassWord')->name('resetPassword');
             Route::get('/user-profile', 'getUserProfile')->name('getUserProfile');
         });
     });

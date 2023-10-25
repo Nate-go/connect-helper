@@ -60,9 +60,9 @@ class AuthenController extends Controller
         return $this->authenService->createNewToken($token);
     }
 
-    public function changePassWord(ChangePasswordFormRequest $request)
+    public function resetPassWord(ChangePasswordFormRequest $request)
     {
-        return $this->authenService->changePassWord($request->all());
+        return $this->authenService->resetPassWord($request->all());
     }
 
     public function sendVerify(SendVerifyFormRequest $request) {
