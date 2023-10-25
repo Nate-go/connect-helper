@@ -44,8 +44,8 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function account_verifies(): HasMany
+    public function account_verifies(): HasOne
     {
-        return $this->hasMany(AccountVerify::class);
+        return $this->hasOne(AccountVerify::class);
     }
 }

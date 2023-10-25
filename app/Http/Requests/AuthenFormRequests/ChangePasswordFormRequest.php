@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\AuthenFormRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginFormRequest extends FormRequest
+class ChangePasswordFormRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,15 +22,8 @@ class LoginFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6'
+            'new_password' => 'required|string|confirmed|min:6',
+            'verify_code' => 'required|string',
         ];
     }
-
-    // public function messages()
-    // {
-    //     return [
-    //         'email.required' => 'It is require',
-    //     ];
-    // }
 }

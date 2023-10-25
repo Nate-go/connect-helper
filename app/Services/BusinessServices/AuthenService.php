@@ -6,48 +6,31 @@ use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
+use App\Http\Requests\LoginFormRequest;
 use App\Models\AccountVerify;
 use App\Models\User;
 use DateInterval;
 use DateTime;
-use DB;
+use Hash;
 use Illuminate\Http\Request;
 use Validator;
 
 class AuthenService
 {
-    public function login(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), StatusResponse::INVALID_VALIDATE);
-        }
-
-        if (!$token = auth()->attempt($validator->validated())) {
+    public function login($input) {
+       
+        if (!$token = auth()->attempt($input)) {
             return response()->json(['error' => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
         }
 
         return $this->createNewToken($token);
     }
 
-    public function signup(Request $request)
+    public function signup($input)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), StatusResponse::INVALID_VALIDATE);
-        }
-
         $data = array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)],
+            $input,
+            ['password' => Hash::make($input['password'])],
             ['role' => UserRole::OWNER],
             ['status' => UserStatus::DEACTIVE]
         );
@@ -65,13 +48,17 @@ class AuthenService
             $data
         );
 
+        AccountVerify::create([
+            'user_id'=> $user->id
+        ]);
+
         $this->createVerify($user->email);
         return $user;
     }
 
     private function generateEncodedString($startTime, $endTime, $userData) {
         $dataToEncode = $startTime . '|' . $endTime . '|' . $userData;
-        return md5($dataToEncode);
+        return Hash::make($dataToEncode);
     }
 
     private function createVerify($email) {
@@ -85,17 +72,17 @@ class AuthenService
         $overDateTime = clone $currentDateTime;
         $overDateTime->add(new DateInterval(UserVerifyTime::ACTIVE_TIME));
 
-        $verify = AccountVerify::create([
-            'user_id' => $user->id,
-            'verify_code' => $this->generateEncodedString($currentDateTime->format('Y-m-d H:i:s'), $overDateTime->format('Y-m-d H:i:s'), json_encode($user)),
-            'overtimed_at' => $overDateTime->format('Y-m-d H:i:s'),
-        ]);
+        $verify = AccountVerify::withTrashed()->where('user_id', $user->id)->first();
+        $verify->verify_code = $this->generateEncodedString($currentDateTime->format('Y-m-d H:i:s'), $overDateTime->format('Y-m-d H:i:s'), json_encode($user));
+        $verify->overtimed_at = $overDateTime->format('Y-m-d H:i:s');
+        $verify->deleted_at = null;
+        $verify->save();
 
         return $verify->verify_code;
     }
 
-    public function sendVerify($email) {
-        $verify_code = $this->createVerify($email);
+    public function sendVerify($input) {
+        $verify_code = $this->createVerify($input['email']);
 
         if(!$verify_code ) {
             return response()->json([
@@ -158,10 +145,10 @@ class AuthenService
         ], StatusResponse::SUCCESS);
     }
 
-    public function activeAccount(Request $request)
+    public function activeAccount($input)
     {
-        $email = $request->email;
-        $verify_code = $request->verify_code;
+        $email = $input['email'];
+        $verify_code = $input['verify_code'];
 
         $user = User::where('email', $email)
             ->where('status', UserStatus::DEACTIVE)
@@ -199,19 +186,10 @@ class AuthenService
         }
     }
 
-    public function changePassword(Request $request)
+    public function changePassword($input)
     {
-        $validator = Validator::make($request->all(), [
-            'new_password' => 'required|string|confirmed|min:6',
-            'verify_code' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), StatusResponse::INVALID_VALIDATE);
-        }
-
-        $verify_code = $request->verify_code;
-        $newPassword = $request->new_password;
+        $verify_code = $input['verify_code'];
+        $newPassword = $input['new_password'];
 
         $user = auth()->user();
 
@@ -246,5 +224,4 @@ class AuthenService
             ], StatusResponse::ERROR);
         }
     }
-
 }

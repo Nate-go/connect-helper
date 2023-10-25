@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthenFormRequests\ChangePasswordFormRequest;
+use App\Http\Requests\AuthenFormRequests\LoginFormRequest;
+use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
+use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
+use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
 use App\Services\BusinessServices\AuthenService;
 use Illuminate\Http\Request;
 
@@ -15,14 +20,14 @@ class AuthenController extends Controller
         $this->authenService = $authenService; 
     }
 
-    public function login(Request $request)
+    public function login(LoginFormRequest $request)
     {
-        return $this->authenService->login($request);
+        return $this->authenService->login($request->all());
     }
 
-    public function signup(Request $request)
+    public function signup(SignUpFormRequest $request)
     {
-        return $this->authenService->signup($request);
+        return $this->authenService->signup($request->all());
     }
 
     public function logout()
@@ -55,16 +60,16 @@ class AuthenController extends Controller
         return $this->authenService->createNewToken($token);
     }
 
-    public function changePassWord(Request $request)
+    public function changePassWord(ChangePasswordFormRequest $request)
     {
-        return $this->authenService->changePassWord($request);
+        return $this->authenService->changePassWord($request->all());
     }
 
-    public function sendVerify(Request $request) {
-        return $this->authenService->sendVerify($request->email);
+    public function sendVerify(SendVerifyFormRequest $request) {
+        return $this->authenService->sendVerify($request->all());
     }
 
-    public function activeAccount(Request $request) {
-        return $this->authenService->activeAccount($request);
+    public function activeAccount(VerifyAccountFormRequest $request) {
+        return $this->authenService->activeAccount($request->all());
     }
 }
