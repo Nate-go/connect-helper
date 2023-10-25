@@ -21,7 +21,8 @@ Route::post('/login', [AuthenController::class, 'login'])->name('login');
 Route::post('/signup', [AuthenController::class, 'signup'])->name('auth.signup');
 Route::get('/unauthenticated', [AuthenController::class, 'throwAuthenError'])->name('auth.authenError');
 Route::get('/unauthorized', [AuthenController::class, 'throwAuthorError'])->name('auth.authorError');
-
+Route::post('/send-verify', [AuthenController::class, 'sendVerify'])->name('sendVerify');
+Route::post('/active-account', [AuthenController::class, 'activeAccount'])->name('activeAccount');
 
 Route::middleware('auth:api')->group(function() {
     Route::middleware('author:' . UserRole::ADMIN)->group(function () {
