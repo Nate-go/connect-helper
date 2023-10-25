@@ -164,26 +164,26 @@ class AuthenService
             ->where('verify_code', $verify_code)
             ->first();
 
-        if ($accountVerify) {
-            if ($accountVerify->overtimed_at > now()) {
-                $user->status = UserStatus::ACTIVE;
-                $user->save();
-
-                $accountVerify->delete();
-
-                return response()->json([
-                    'message' => 'Activate account successfully'
-                ], StatusResponse::SUCCESS);
-            } else {
-                return response()->json([
-                    'message' => 'Your verify code is expired'
-                ], StatusResponse::ERROR);
-            }
-        } else {
+        if (!$accountVerify) {
             return response()->json([
                 'message' => 'Your verify code is invalid'
             ], StatusResponse::ERROR);
-        }
+        } 
+
+        if ($accountVerify->overtimed_at < now()) {
+            return response()->json([
+                'message' => 'Your verify code is expired'
+            ], StatusResponse::ERROR);
+        } 
+
+        $user->status = UserStatus::ACTIVE;
+        $user->save();
+
+        $accountVerify->delete();
+
+        return response()->json([
+            'message' => 'Activate account successfully'
+        ], StatusResponse::SUCCESS);
     }
 
     public function changePassword($input)
@@ -203,25 +203,25 @@ class AuthenService
             ->where('verify_code', $verify_code)
             ->first();
 
-        if ($accountVerify) {
-            if ($accountVerify->overtimed_at > now()) {
-                $user->password = bcrypt($newPassword);
-                $user->save();
-
-                $accountVerify->delete();
-
-                return response()->json([
-                    'message' => 'Change password successfully'
-                ], StatusResponse::SUCCESS);
-            } else {
-                return response()->json([
-                    'message' => 'Your verify code is expired'
-                ], StatusResponse::ERROR);
-            }
-        } else {
+        if (!$accountVerify) {
             return response()->json([
                 'message' => 'Your verify code is invalid'
             ], StatusResponse::ERROR);
-        }
+        } 
+
+        if ($accountVerify->overtimed_at < now()) {
+            return response()->json([
+                'message' => 'Your verify code is expired'
+            ], StatusResponse::ERROR);
+        } 
+
+        $user->password = bcrypt($newPassword);
+        $user->save();
+
+        $accountVerify->delete();
+
+        return response()->json([
+            'message' => 'Change password successfully'
+        ], StatusResponse::SUCCESS);
     }
 }
