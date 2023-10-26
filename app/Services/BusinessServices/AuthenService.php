@@ -20,7 +20,11 @@ class AuthenService
     public function login($input) {
        
         if (!$token = auth()->attempt($input)) {
+<<<<<<< HEAD
             return response()->json(["message" => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
+=======
+            return response()->json(['error' => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
         }
 
         return $this->createNewToken($token);
@@ -86,7 +90,11 @@ class AuthenService
 
         if(!$verify_code ) {
             return response()->json([
+<<<<<<< HEAD
                 "message" => 'Can not find out the email'
+=======
+                'error' => 'Can not find out the email'
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
             ], StatusResponse::ERROR);
         }
 
@@ -103,12 +111,20 @@ class AuthenService
 
     public function throwAuthenError()
     {
+<<<<<<< HEAD
         return response()->json(["message" => "You need to login to access"], StatusResponse::UNAUTHORIZED);
+=======
+        return response()->json(["error" => "Unauthenticated", "message" => "You need to login to access"], StatusResponse::UNAUTHORIZED);
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
     }
 
     public function throwAuthorError()
     {
+<<<<<<< HEAD
         return response()->json(["message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
+=======
+        return response()->json(["error" => "Unauthorized", "message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
     }
 
     public function refresh()
@@ -127,13 +143,21 @@ class AuthenService
 
         if($user->status == UserStatus::DEACTIVE) {
             return response()->json([
+<<<<<<< HEAD
                 "message"=> "Your account is deactived"
+=======
+                "error"=> "Your account is deactived"
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
             ], StatusResponse::DEACTIVED_ACCOUNT);
         }
 
         if ($user->status == UserStatus::BLOCK) {
             return response()->json([
+<<<<<<< HEAD
                 "message" => "Your account is blocked"
+=======
+                "error" => "Your account is blocked"
+>>>>>>> fb1ca02774e5a74b4ca48ccc6201f2bc339839db
             ], StatusResponse::BLOCKED_ACCOUNT);
         }
 
