@@ -6,14 +6,16 @@ use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
-use App\Http\Requests\LoginFormRequest;
-use App\Models\AccountVerify;
+use App\Jobs\SendMailQueue;
+use App\Models\Enterprise;
+use App\Models\GmailToken;
 use App\Models\User;
 use DateInterval;
 use DateTime;
+use Google_Client;
+use Google_Service_PeopleService;
 use Hash;
-use Illuminate\Http\Request;
-use Validator;
+
 
 class AuthenService
 {
@@ -28,14 +30,48 @@ class AuthenService
 
     public function signup($input)
     {
-        $data = array_merge(
-            $input,
-            ['password' => Hash::make($input['password'])],
-            ['role' => UserRole::OWNER],
-            ['status' => UserStatus::DEACTIVE]
-        );
+        $gmailToken = $input['email'];
+        $client = new Google_Client();
+        $client->setAccessToken($gmailToken['access_token']);
+        $service = new Google_Service_PeopleService($client);
 
-        $user = $this->setUpUser($data);
+        $person = $service->people->get('people/me', ['personFields' => 'emailAddresses']);
+        $email = $person->getEmailAddresses()[0]->getValue();
+
+        $existEmail = User::where('email', $email)->where('status', UserStatus::ACTIVE)->exists();
+
+        if ($existEmail) {
+            return response()->json([
+                'message' => 'This email has been used',
+            ], StatusResponse::ERROR);
+        }
+
+        $existEnterprise = Enterprise::where('name', $input['enterprise'])->exists();
+
+        if ($existEnterprise) {
+            return response()->json([
+                'message' => 'This enterprise has been used',
+            ], StatusResponse::ERROR);
+        }
+
+        $enterprise = Enterprise::create([
+            'name' => $input['enterprise']
+        ]);
+
+        $user = User::create([
+            'enterprise_id' => $enterprise->id,
+            'email' => $email,
+            'name' => $input['name'],
+            'password' => Hash::make($input['password']),
+            'role' => UserRole::OWNER,
+            'status' => UserStatus::ACTIVE,
+        ]);
+
+        $gmailToken = GmailToken::create(array_merge(
+                $gmailToken, 
+                ['user_id' => $user->id]
+            )
+        );
 
         return response()->json([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
@@ -43,17 +79,8 @@ class AuthenService
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    private function setUpUser($data) {
-        $user = User::create(
-            $data
-        );
-
-        AccountVerify::create([
-            'user_id'=> $user->id
-        ]);
-
-        $this->createVerify($user->email);
-        return $user;
+    private function setUpConnection($data) {
+        
     }
 
     private function generateEncodedString($startTime, $endTime, $userData) {
@@ -72,11 +99,13 @@ class AuthenService
         $overDateTime = clone $currentDateTime;
         $overDateTime->add(new DateInterval(UserVerifyTime::ACTIVE_TIME));
 
-        $verify = AccountVerify::withTrashed()->where('user_id', $user->id)->first();
+        $verify = $user->account_verify;
         $verify->verify_code = $this->generateEncodedString($currentDateTime->format('Y-m-d H:i:s'), $overDateTime->format('Y-m-d H:i:s'), json_encode($user));
         $verify->overtimed_at = $overDateTime->format('Y-m-d H:i:s');
         $verify->deleted_at = null;
         $verify->save();
+
+        SendMailQueue::dispatch($user);
 
         return $verify->verify_code;
     }
@@ -92,7 +121,6 @@ class AuthenService
 
         return response()->json([
             'message'=> 'Send verify code successfully',
-            'verify_code' => $verify_code,
         ], StatusResponse::SUCCESS);
     }
     public function logout()
@@ -209,4 +237,6 @@ class AuthenService
 
         return null;
     }
+
+    
 }
