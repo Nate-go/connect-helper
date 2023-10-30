@@ -30,7 +30,7 @@ class AuthenService
 
     public function signup($input)
     {
-        $gmailToken = $input['email'];
+        $gmailToken = $input['gmail_token'];
         $client = new Google_Client();
         $client->setAccessToken($gmailToken['access_token']);
         $service = new Google_Service_PeopleService($client);

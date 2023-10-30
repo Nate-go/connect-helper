@@ -23,7 +23,7 @@ class SignUpFormRequest extends FormRequest
     {
         return [
             'name' => 'required|string|between:2,100',
-            'email' => 'required',
+            'gmail_token' => 'required',
             'password' => 'required|string|confirmed|min:6',
             'enterprise' => 'required|string'
         ];
