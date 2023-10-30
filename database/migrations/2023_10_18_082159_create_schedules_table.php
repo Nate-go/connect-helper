@@ -15,9 +15,13 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('user_id')->nullable();
             $table->string('title')->nullable();
+            $table->string('content')->nullable();
             $table->string('place')->nullable();
             $table->integer('type')->nullable();
             $table->integer('status')->nullable();
+            $table->integer('classification')->nullable();
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

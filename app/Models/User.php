@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,8 +45,13 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function account_verify(): HasOne
+    public function gmailToken(): HasOne
     {
-        return $this->hasOne(AccountVerify::class);
+        return $this->hasOne(GmailToken::class);
+    }
+
+    public function enterprise(): BelongsTo
+    {
+        return $this->belongsTo(Enterprise::class);
     }
 }

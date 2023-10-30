@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('enterprise_id')->nullable();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->nullable();
             $table->string('password');
             $table->integer('role');
             $table->string('image_url')->nullable();
             $table->string('phonenumber')->nullable();
+            $table->string('verify_code')->nullable();
+            $table->timestamp('overtimed_at')->nullable();
             $table->integer('status')->nullable();
             $table->integer('gender')->nullable();
             $table->rememberToken();

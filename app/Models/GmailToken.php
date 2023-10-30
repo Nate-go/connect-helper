@@ -4,19 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AccountVerify extends Model
+class GmailToken extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id',
-        'verify_code',
-        'overtimed_at',
-    ];
+        "user_id",
+        "access_token",
+        "expires_in",
+        "scope", 
+        "token_type",
+    ] ;
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_verifies', function (Blueprint $table) {
+        Schema::create('gmail_tokens', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->nullable();
-            $table->string('verify_code')->nullable();
-            $table->timestamp('overtimed_at')->nullable();
+            $table->string('access_token')->nullable();
+            $table->string('scope')->nullable();
+            $table->string('token_type')->nullable();
+            $table->integer('expires_in')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_verifies');
+        Schema::dropIfExists('gmail_tokens');
     }
 };
