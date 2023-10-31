@@ -73,9 +73,9 @@ class AuthenController extends Controller
         return $this->authenService->activeAccount($request->all());
     }
 
-    public function redirectToGoogle(Request $request)
+    public function redirectToGoogle()
     {
-        return $this->authenService->redirectToGoogle($request);
+        return $this->authenService->redirectToGoogle();
     }
 
     public function handleGoogleCallback(Request $request)

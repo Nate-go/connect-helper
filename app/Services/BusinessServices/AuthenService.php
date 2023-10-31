@@ -10,15 +10,40 @@ use App\Jobs\SendMailQueue;
 use App\Models\Enterprise;
 use App\Models\GmailToken;
 use App\Models\User;
+use App\Services\ModelServices\ConnectionService;
+use App\Services\ModelServices\EnterpriseService;
+use App\Services\ModelServices\GmailTokenService;
+use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
 use Google_Client;
 use Google_Service_PeopleService;
 use Hash;
+use Illuminate\Http\Request;
 
 
 class AuthenService
 {
+    protected $enterpriseService;
+
+    protected $userService;
+
+    protected $gmailTokenService;
+
+    protected $connectionService;
+
+    public function __construct(
+            EnterpriseService $enterpriseService, 
+            UserService $userService, 
+            GmailTokenService $gmailTokenService,
+            ConnectionService $connectionService
+        ) {
+        $this->enterpriseService = $enterpriseService;
+        $this->userService = $userService;
+        $this->gmailTokenService = $gmailTokenService;
+        $this->connectionService = $connectionService;
+    }
+
     public function login($input) {
        
         if (!$token = auth()->attempt($input)) {
@@ -31,34 +56,25 @@ class AuthenService
     public function signup($input)
     {
         $gmailToken = $input['gmail_token'];
-        $client = new Google_Client();
-        $client->setAccessToken($gmailToken['access_token']);
-        $service = new Google_Service_PeopleService($client);
+        $email = $this->gmailTokenService->getEmailFromToken($gmailToken['access_token']);
 
-        $person = $service->people->get('people/me', ['personFields' => 'emailAddresses']);
-        $email = $person->getEmailAddresses()[0]->getValue();
-
-        $existEmail = User::where('email', $email)->where('status', UserStatus::ACTIVE)->exists();
-
-        if ($existEmail) {
+        if ($this->userService->isEmailExist($email)) {
             return response()->json([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
         }
 
-        $existEnterprise = Enterprise::where('name', $input['enterprise'])->exists();
-
-        if ($existEnterprise) {
+        if ($this->enterpriseService->isExisted($input['enterprise'])) {
             return response()->json([
                 'message' => 'This enterprise has been used',
             ], StatusResponse::ERROR);
         }
 
-        $enterprise = Enterprise::create([
+        $enterprise = $this->enterpriseService->create([
             'name' => $input['enterprise']
         ]);
 
-        $user = User::create([
+        $user = $this->userService->create([
             'enterprise_id' => $enterprise->id,
             'email' => $email,
             'name' => $input['name'],
@@ -67,20 +83,18 @@ class AuthenService
             'status' => UserStatus::ACTIVE,
         ]);
 
-        $gmailToken = GmailToken::create(array_merge(
+        $this->gmailTokenService->create(array_merge(
                 $gmailToken, 
                 ['user_id' => $user->id]
             )
         );
 
+        $this->connectionService->setUp($user);
+
         return response()->json([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
             'user' => $user
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
-    }
-
-    private function setUpConnection($data) {
-        
     }
 
     private function generateEncodedString($startTime, $endTime, $userData) {
@@ -238,5 +252,43 @@ class AuthenService
         return null;
     }
 
-    
+    public function redirectToGoogle()
+    {
+        $service = $this->gmailTokenService->getGmailService(2);
+
+        $this->connectionService->setUp($service);
+    }
+
+    // public function redirectToGoogle()
+    // {
+    //     $client = new Google_Client();
+    //     $client->setClientId(env('GOOGLE_CLIENT_ID'));
+    //     $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+    //     $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
+    //     $client->addScope('email');
+    //     $client->addScope('profile');
+    //     $client->setAccessType('offline'); // Add this line
+
+    //     dd($client->createAuthUrl());
+    //     return redirect($client->createAuthUrl());
+    // }
+
+    // public function handleGoogleCallback(Request $request)
+    // {
+    //     $client = new Google_Client();
+    //     $client->setClientId(env('GOOGLE_CLIENT_ID'));
+    //     $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+    //     $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
+    //     $client->addScope('email');
+    //     $client->addScope('profile');
+
+    //     $client->authenticate($request->get('code'));
+    //     $accessToken = $client->getAccessToken();
+
+    //     dd($accessToken);
+
+    //     // $accessToken contains the access token and refresh token
+
+    //     return response()->json($accessToken);
+    // }
 }
