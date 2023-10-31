@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\ModelServices\ConnectionService;
 use Illuminate\Http\Request;
 
 class ConnectionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $connectionService;
+
+    public function __construct(ConnectionService $connectionService) {
+        $this->connectionService = $connectionService;
+    }
+
     public function index()
     {
-        //
+        return $this->connectionService->getConnections();
     }
 
     /**

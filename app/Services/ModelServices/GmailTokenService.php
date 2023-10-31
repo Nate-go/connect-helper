@@ -10,6 +10,11 @@ use Google_Service_PeopleService;
 
 class GmailTokenService extends BaseService
 {
+    public function __construct()
+    {
+        parent::__construct(GmailToken::class);
+    }
+    
     private function getAccessToken($user) {
         if(is_numeric($user)) {
             $user = User::where('id', $user)->first();
@@ -26,10 +31,6 @@ class GmailTokenService extends BaseService
 
         $person = $service->people->get('people/me', ['personFields' => 'emailAddresses']);
         return $person->getEmailAddresses()[0]->getValue();
-    }
-
-    public function create($data) {
-        return GmailToken::create($data);
     }
 
     public function getGmailService($user) {

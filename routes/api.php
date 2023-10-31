@@ -2,6 +2,7 @@
 
 use App\Constants\UserConstant\UserRole;
 use App\Http\Controllers\Api\AuthenController;
+use App\Http\Controllers\Api\ConnectionController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,12 @@ Route::middleware('auth:api')->group(function() {
             Route::post('/refresh', 'refresh')->name('refresh');
             Route::post('/reset-pass', 'resetPassWord')->name('resetPassword');
             Route::get('/user-profile', 'getUserProfile')->name('getUserProfile');
+        });
+    });
+
+    Route::controller(ConnectionController::class)->group(function () {
+        Route::name('auth.')->group(function () {
+            Route::get('/connections', 'index')->name('getConnection');
         });
     });
 });

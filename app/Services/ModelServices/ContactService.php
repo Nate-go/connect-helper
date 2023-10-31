@@ -5,8 +5,7 @@ use App\Models\Contact;
 
 class ContactService extends BaseService
 {
-    public function create($data)
-    {
-        return Contact::create($data);
+    public function __construct() {
+        parent::__construct(Contact::class);
     }
 }
