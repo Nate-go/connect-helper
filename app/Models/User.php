@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -54,5 +55,15 @@ class User extends Authenticatable implements JWTSubject
     public function enterprise(): BelongsTo
     {
         return $this->belongsTo(Enterprise::class);
+    }
+
+    public function connections(): BelongsToMany
+    {
+        return $this->belongsToMany(Connection::class, 'connection_users');
+    }
+
+    public function ownConnections(): HasMany 
+    {
+        return $this->hasMany(Connection::class);
     }
 }

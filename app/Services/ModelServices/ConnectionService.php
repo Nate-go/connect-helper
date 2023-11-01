@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Services\ModelServices;
+
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
+use App\Http\Responses\ConnectionFormResponse;
 use App\Models\Connection;
 use App\Models\ConnectionUser;
 use App\Models\User;
@@ -14,9 +17,39 @@ class ConnectionService extends BaseService
 
     protected $contactService;
 
-    public function __construct(GmailTokenService $gmailTokenService, ContactService $contactService, ) {
+    protected $enterpriseService;
+    
+    public function __construct(GmailTokenService $gmailTokenService, ContactService $contactService, EnterpriseService $enterpriseService) {
+        parent::__construct(Connection::class);
         $this->gmailTokenService = $gmailTokenService;
         $this->contactService = $contactService;
+        $this->enterpriseService = $enterpriseService;
+    }
+
+    public function getConnections() {
+
+        $enterprise = auth()->user()->enterprise;
+
+        if (!$enterprise) {
+            return [];
+        }
+
+        $users = $enterprise->users;
+
+        $connections = collect([]);
+
+        foreach ($users as $user) {
+            if($user->id == auth()->user()->id) {
+                $connections = $connections->merge($user->connections);
+            } else {
+                $connections = $connections->merge($user->connections->wherePivot('status', ConnectionStatus::PUBLIC)->get());
+            }
+        }
+
+        return response()->json([
+            'message' => 'Get connection successfully',
+            'connections' => $this->formResponseService->connectionsFormResponse($connections)
+        ], StatusResponse::SUCCESS);
     }
 
     public function createConnectionUser(User $user, Connection $connection) {
@@ -42,6 +75,10 @@ class ConnectionService extends BaseService
 
     public function setUp($user) {
         if (is_numeric($user)) {
+            $user = $this->getFirst($user);
+        }
+
+        $this->setConnectionUser($user, $user->name, $user->email);
             $user = User::where('id', $user)->first();
         }
         
@@ -67,20 +104,26 @@ class ConnectionService extends BaseService
         }
 
         foreach ($recipients as $email => $name) {
-            $connection = Connection::create([
-                'name' => $name,
-                'note' => $email,
-                'type' => ConnectionType::PERSON,
-                'status' => ConnectionStatus::PUBLIC
-            ]);
-
-            $this->contactService->create([
-                'connection_id' => $connection->id,
-                'content' => $email,
-                'type' => ContactType::MAIL,
-            ]);
-
-            $this->createConnectionUser($user, $connection);
+            $this->setConnectionUser($user, $email, $name);
         }
     }
+
+    private function setConnectionUser($user, $name, $email) {
+        $connection = $this->create([
+            'name' => $name,
+            'note' => $email,
+            'type' => ConnectionType::PERSON,
+            'status' => ConnectionStatus::PUBLIC,
+            'user_id' => $user->id,
+        ]);
+
+        $this->contactService->create([
+            'connection_id' => $connection->id,
+            'content' => $email,
+            'type' => ContactType::MAIL,
+        ]);
+
+        $this->createConnectionUser($user, $connection);
+    }
+
 }

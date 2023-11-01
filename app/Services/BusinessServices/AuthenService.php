@@ -7,8 +7,6 @@ use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
 use App\Jobs\SendMailQueue;
-use App\Models\Enterprise;
-use App\Models\GmailToken;
 use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
@@ -16,8 +14,6 @@ use App\Services\ModelServices\GmailTokenService;
 use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
-use Google_Client;
-use Google_Service_PeopleService;
 use Hash;
 use Illuminate\Http\Request;
 
