@@ -40,4 +40,5 @@ class Connection extends Model
     {
         return $this->hasMany(ConnectionHistory::class);
     }
+
 }

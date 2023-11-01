@@ -8,6 +8,7 @@ class EnterpriseService extends BaseService
 {
     public function __construct() {
         parent::__construct(Enterprise::class);
+
     }
 
     public function isExisted($name) {

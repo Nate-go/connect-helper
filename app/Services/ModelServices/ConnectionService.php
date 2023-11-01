@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\ModelServices;
+
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\ConnectionConstant\ConnectionType;
@@ -78,6 +79,8 @@ class ConnectionService extends BaseService
         }
 
         $this->setConnectionUser($user, $user->name, $user->email);
+            $user = User::where('id', $user)->first();
+        }
         
         $service = $this->gmailTokenService->getGmailService($user);
 
@@ -122,4 +125,5 @@ class ConnectionService extends BaseService
 
         $this->createConnectionUser($user, $connection);
     }
+
 }

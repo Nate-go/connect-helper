@@ -15,6 +15,7 @@ use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
 use Hash;
+use Illuminate\Http\Request;
 
 
 class AuthenService
