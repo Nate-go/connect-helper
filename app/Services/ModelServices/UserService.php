@@ -6,9 +6,9 @@ use App\Constants\UserConstant\UserStatus;
 use App\Models\User;
 
 class UserService extends BaseService {
-    public function __construct()
+    public function __construct(User $user)
     {
-        parent::__construct(User::class);
+        $this->model = $user;
     }
 
     public function getAllOwner() {

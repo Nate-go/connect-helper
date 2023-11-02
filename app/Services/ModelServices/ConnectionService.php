@@ -5,10 +5,12 @@ use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
-use App\Http\Responses\ConnectionFormResponse;
+use App\Constants\UtilConstant;
+use App\Http\Resources\ConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionUser;
 use App\Models\User;
+use Request;
 
 class ConnectionService extends BaseService
 {
@@ -18,37 +20,21 @@ class ConnectionService extends BaseService
 
     protected $enterpriseService;
     
-    public function __construct(GmailTokenService $gmailTokenService, ContactService $contactService, EnterpriseService $enterpriseService) {
-        parent::__construct(Connection::class);
+    public function __construct(Connection $connection, GmailTokenService $gmailTokenService, ContactService $contactService, EnterpriseService $enterpriseService) {
+        $this->model = $connection;
         $this->gmailTokenService = $gmailTokenService;
         $this->contactService = $contactService;
         $this->enterpriseService = $enterpriseService;
     }
 
-    public function getConnections() {
+    public function getConnections($input) {
+        $tags = $input["tags"] ?? [];
+        $statuses = $input["statuses"] ?? [];
 
-        $enterprise = auth()->user()->enterprise;
-
-        if (!$enterprise) {
-            return [];
-        }
-
-        $users = $enterprise->users;
-
-        $connections = collect([]);
-
-        foreach ($users as $user) {
-            if($user->id == auth()->user()->id) {
-                $connections = $connections->merge($user->connections);
-            } else {
-                $connections = $connections->merge($user->connections->wherePivot('status', ConnectionStatus::PUBLIC)->get());
-            }
-        }
-
-        return response()->json([
-            'message' => 'Get connection successfully',
-            'connections' => $this->formResponseService->connectionsFormResponse($connections)
-        ], StatusResponse::SUCCESS);
+        $query = $this->model->enterpriseConnection()->tagFilter($tags)->statusFilter($statuses);
+        $data = $this->getAll($input, $query);
+        $data['items'] = ConnectionResource::collection($data['items']);
+        return $data;
     }
 
     public function createConnectionUser(User $user, Connection $connection) {
@@ -101,7 +87,7 @@ class ConnectionService extends BaseService
         }
 
         foreach ($recipients as $email => $name) {
-            $this->setConnectionUser($user, $email, $name);
+            $this->setConnectionUser($user, $name, $email);
         }
     }
 
@@ -110,8 +96,9 @@ class ConnectionService extends BaseService
             'name' => $name,
             'note' => $email,
             'type' => ConnectionType::PERSON,
-            'status' => ConnectionStatus::PUBLIC,
+            'status' => ConnectionStatus::PRIVATE,
             'user_id' => $user->id,
+            'enterprise_id' => $user->enterprise_id
         ]);
 
         $this->contactService->create([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
 use App\Services\ModelServices\ConnectionService;
 use Illuminate\Http\Request;
@@ -14,9 +15,13 @@ class ConnectionController extends Controller
         $this->connectionService = $connectionService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->connectionService->getConnections();
+        $data = $this->connectionService->getConnections($request->all());
+        return response()->json([
+            'message' => 'Get connection successfully',
+            'data' => $data
+        ], StatusResponse::SUCCESS);
     }
 
     /**

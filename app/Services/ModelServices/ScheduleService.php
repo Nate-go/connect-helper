@@ -5,8 +5,8 @@ use App\Models\Schedule;
 
 class ScheduleService extends BaseService
 {
-    public function __construct()
+    public function __construct(Schedule $schedule)
     {
-        parent::__construct(Schedule::class);
+        $this->model = $schedule;
     }
 }

@@ -10,9 +10,9 @@ use Google_Service_PeopleService;
 
 class GmailTokenService extends BaseService
 {
-    public function __construct()
+    public function __construct(GmailToken $gmailToken)
     {
-        parent::__construct(GmailToken::class);
+        $this->model = $gmailToken;
     }
     
     private function getAccessToken($user) {

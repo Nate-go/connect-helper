@@ -3,6 +3,7 @@
 use App\Constants\UserConstant\UserRole;
 use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -48,8 +49,17 @@ Route::middleware('auth:api')->group(function() {
     });
 
     Route::controller(ConnectionController::class)->group(function () {
-        Route::name('auth.')->group(function () {
+        Route::name('connection.')->group(function () {
             Route::get('/connections', 'index')->name('getConnection');
+        });
+    });
+
+    Route::controller(TagController::class)->group(function () {
+        Route::name('tag.')->group(function () {
+            Route::get('/tags', 'index')->name('get');
+            Route::post('/tags', 'store')->name('store');
+            Route::put('/tags/{tag_id}', 'update')->name('update');
+            Route::delete('tags/{tag_id}', 'delete')->name('delete');
         });
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\ConnectionConstant\ConnectionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +19,8 @@ class Connection extends Model
         'note',
         'type',
         'status',
-        'user_id'
+        'user_id',
+        'enterprise_id'
     ];
 
     public function user() : BelongsTo
@@ -40,4 +42,33 @@ class Connection extends Model
     {
         return $this->hasMany(ConnectionHistory::class);
     }
+
+    public function scopeTagFilter($query, $values)
+    {
+        if (count($values) == 0) {
+            return $query;
+        }
+
+        $query->whereHas('tags', function ($query) use ($values) {
+            $query->whereIn('tag_id', $values);
+        });
+    }
+
+    public function scopeStatusFilter($query, $values)
+    {
+        if (count($values) == 0) {
+            return $query;
+        }
+
+        $query->whereIn('status', $values);
+    }
+
+    public function scopeEnterpriseConnection($query) {
+        $query->where('user_id', auth()->user()->id)
+            ->orWhere(function ($query) {
+                $query->where('enterprise_id', auth()->user()->enterprise_id)
+                    ->where('status', ConnectionStatus::PUBLIC);
+            });
+    }
+    
 }

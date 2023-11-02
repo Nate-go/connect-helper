@@ -7,6 +7,7 @@ use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
 use App\Jobs\SendMailQueue;
+use App\Jobs\SetupDataForUser;
 use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
@@ -84,7 +85,9 @@ class AuthenService
             )
         );
 
-        $this->connectionService->setUp($user);
+        SetupDataForUser::dispatch($user);
+
+        //$this->connectionService->setUp($user);
 
         return response()->json([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
