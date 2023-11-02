@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\ModelServices;
+
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\ConnectionConstant\ConnectionType;
@@ -11,6 +12,7 @@ use App\Models\Connection;
 use App\Models\ConnectionUser;
 use App\Models\User;
 use Request;
+
 
 class ConnectionService extends BaseService
 {
@@ -35,6 +37,7 @@ class ConnectionService extends BaseService
         $data = $this->getAll($input, $query);
         $data['items'] = ConnectionResource::collection($data['items']);
         return $data;
+
     }
 
     public function createConnectionUser(User $user, Connection $connection) {
@@ -99,6 +102,7 @@ class ConnectionService extends BaseService
             'status' => ConnectionStatus::PRIVATE,
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id
+
         ]);
 
         $this->contactService->create([
@@ -109,4 +113,5 @@ class ConnectionService extends BaseService
 
         $this->createConnectionUser($user, $connection);
     }
+
 }

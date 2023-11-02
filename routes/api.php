@@ -62,4 +62,5 @@ Route::middleware('auth:api')->group(function() {
             Route::delete('tags/{tag_id}', 'delete')->name('delete');
         });
     });
+
 });

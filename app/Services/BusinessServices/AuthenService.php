@@ -8,6 +8,7 @@ use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
 use App\Jobs\SendMailQueue;
 use App\Jobs\SetupDataForUser;
+
 use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
@@ -16,6 +17,7 @@ use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
 use Hash;
+use Illuminate\Http\Request;
 
 
 class AuthenService
@@ -86,8 +88,6 @@ class AuthenService
         );
 
         SetupDataForUser::dispatch($user);
-
-        //$this->connectionService->setUp($user);
 
         return response()->json([
             'message' => $user ? 'User successfully registered' : 'User fail registered',

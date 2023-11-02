@@ -21,6 +21,7 @@ class Connection extends Model
         'status',
         'user_id',
         'enterprise_id'
+
     ];
 
     public function user() : BelongsTo
@@ -70,5 +71,5 @@ class Connection extends Model
                     ->where('status', ConnectionStatus::PUBLIC);
             });
     }
-    
+
 }
