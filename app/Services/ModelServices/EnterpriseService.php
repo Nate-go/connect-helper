@@ -6,9 +6,8 @@ use App\Models\User;
 
 class EnterpriseService extends BaseService
 {
-    public function __construct() {
-        parent::__construct(Enterprise::class);
-
+    public function __construct(Enterprise $enterprise) {
+        $this->model = $enterprise;
     }
 
     public function isExisted($name) {
