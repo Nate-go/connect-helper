@@ -17,7 +17,7 @@ class ConnectionResource extends JsonResource
             'status' => $this->status,
             'owner' => $this->user?->name,
             'created_at' => $this->created_at,
-            'tags' => $this->tags->pluck('name')->toArray(),
+            'tags' => $this->tags->where('user_id', auth()->user()->id)->pluck('name','id')->toArray(),
             'users' => $this->users->pluck('name')->toArray(),
         ];
 

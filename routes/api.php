@@ -50,7 +50,10 @@ Route::middleware('auth:api')->group(function() {
 
     Route::controller(ConnectionController::class)->group(function () {
         Route::name('connection.')->group(function () {
-            Route::get('/connections', 'index')->name('getConnection');
+            Route::get('/connections', 'index')->name('getConnections');
+            Route::delete('/connections', 'destroy')->name('deleteConnections');
+            Route::get('/connections/merge', 'merge')->name('megreConnections');
+            Route::put('/connections', 'update')->name('updateConnections');
         });
     });
 

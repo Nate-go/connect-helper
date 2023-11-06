@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
 use App\Services\ModelServices\TagService;
 use Illuminate\Http\Request;
@@ -26,12 +27,16 @@ class TagController extends Controller
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        return $this->tagService->create($request->all());
+        $result = $this->tagService->create($request->all());
+        $message = "This tag name has been exist";
+        if($result) {
+            $message = "Create tag successfully";
+        };
+        return response()->json([
+            "message" => $message
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     /**

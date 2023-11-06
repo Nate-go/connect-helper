@@ -114,4 +114,25 @@ class ConnectionService extends BaseService
         $this->createConnectionUser($user, $connection);
     }
 
+    public function merge($ids, $main) {
+        if(count($ids) < 2 or !$main) return false;
+
+        $connections = $this->model->whereIn('id', $ids)->get();
+
+        foreach($connections as $connection) {
+            if($main == $connection->id) continue;
+
+            $contacts = $connection->contacts;
+
+            foreach($contacts as $contact) {
+                $contact->connection_id = $main;
+                $contact->save();
+            }
+
+            $connection->delete();
+        }
+
+        return true;
+    }
+
 }

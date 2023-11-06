@@ -24,35 +24,30 @@ class ConnectionController extends Controller
         ], StatusResponse::SUCCESS);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+
+    public function update(Request $request)
     {
-        //
+        return $this->connectionService->update($request->get('ids') ?? [], $request->get('data') ?? []);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $this->connectionService->delete($request->get('ids') ?? []);
+    }
+
+    public function merge(Request $request) {
+        $result = $this->connectionService->merge($request->get('ids') ?? [], $request->get('main') ?? null);
+        return response()->json([], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }

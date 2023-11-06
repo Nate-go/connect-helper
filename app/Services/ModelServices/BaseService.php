@@ -10,15 +10,16 @@ class BaseService {
     protected $formResponseService;
 
     public function create($data) {
+        if(!$data) return null;
         return $this->model->create($data);
     }
 
-    public function update($id, $data) {
-        return $this->model->where('id', $id)->update($id, $data);
+    public function update($ids, $data) {
+        return $this->model->whereIn('id', $ids)->update($data);
     }
 
-    public function delete($id) {
-        return $this->model->where('id', $id)->delete();
+    public function delete($ids) {
+        return $this->model->destroy($ids);
     }
 
     public function getFirst($id) {
