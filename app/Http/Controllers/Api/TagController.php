@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TagFormRequests\StoreTagFormRequest;
 use App\Services\ModelServices\TagService;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class TagController extends Controller
     public function __construct(TagService $tagService) {
         $this->tagService = $tagService;
     }
-    
+
     public function index()
     {
         return $this->tagService->getAllTags();
@@ -25,16 +26,12 @@ class TagController extends Controller
         
     }
 
-    public function store(Request $request)
+    public function store(StoreTagFormRequest $request)
     {
-        $result = $this->tagService->create($request->all());
-        $message = "This tag name has been exist";
-        if($result) {
-            $message = "Create tag successfully";
-        };
+        $this->tagService->create($request->all());
         return response()->json([
-            "message" => $message
-        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+            "message" => "Create tag successfully"
+        ], StatusResponse::SUCCESS);
     }
 
     public function show(string $id)
