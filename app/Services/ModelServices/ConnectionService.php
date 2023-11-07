@@ -9,6 +9,7 @@ use App\Constants\ContactConstant\ContactType;
 use App\Constants\UtilConstant;
 use App\Http\Resources\ConnectionResource;
 use App\Models\Connection;
+use App\Models\ConnectionTag;
 use App\Models\ConnectionUser;
 use App\Models\User;
 use Request;
@@ -130,6 +131,24 @@ class ConnectionService extends BaseService
             }
 
             $connection->delete();
+        }
+
+        return true;
+    }
+
+    public function addTagsToConnections($tagIds, $connectionIds) {
+        if(count($tagIds) == 0 or count($connectionIds) == 0) return false;
+
+        foreach($connectionIds as $connectionId) {
+            foreach($tagIds as $tagId) {
+                $connection_tags = ConnectionTag::where('connection_id', $connectionId)->where('tag_id', $tagId)->first();
+                if(!$connection_tags) {
+                    ConnectionTag::create([
+                        'connection_id' => $connectionId,
+                        'tag_id' => $tagId
+                    ]);
+                }
+            }
         }
 
         return true;
