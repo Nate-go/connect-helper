@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TagFormRequests\StoreTagFormRequest;
 use App\Services\ModelServices\TagService;
 use Illuminate\Http\Request;
 
@@ -13,54 +15,47 @@ class TagController extends Controller
     public function __construct(TagService $tagService) {
         $this->tagService = $tagService;
     }
+
     public function index()
     {
         return $this->tagService->getAllTags();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreTagFormRequest $request)
     {
-        return $this->tagService->create($request->all());
+        $this->tagService->create($request->all());
+        return response()->json([
+            "message" => "Create tag successfully"
+        ], StatusResponse::SUCCESS);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        
+        $result = $this->tagService->detail($id);
+        if (!$result) {
+            return response()->json([
+                'message' => 'Can not find out this tag'
+            ], StatusResponse::ERROR);
+        }
+
+        return response()->json($result, StatusResponse::SUCCESS);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         return $this->tagService->update($id, $request->all());
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function delete(string $id)
     {
         return $this->tagService->delete($id);

@@ -34,6 +34,11 @@ class Connection extends Model
         return $this->belongsToMany(User::class, 'connection_users', 'connection_id', 'user_id');
     }
 
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'connection_tags', 'connection_id', 'tag_id');

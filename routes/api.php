@@ -50,7 +50,13 @@ Route::middleware('auth:api')->group(function() {
 
     Route::controller(ConnectionController::class)->group(function () {
         Route::name('connection.')->group(function () {
-            Route::get('/connections', 'index')->name('getConnection');
+            Route::get('/connections', 'index')->name('getConnections');
+            Route::delete('/connections', 'destroy')->name('deleteConnections');
+            Route::get('/connections/merge', 'merge')->name('megreConnections');
+            Route::put('/connections', 'update')->name('updateConnections');
+            Route::post('/connections/addTags', 'addTags')->name('addTagToConnections');
+            Route::post('/connections/deleteTags', 'deleteTags')->name('deleteTagToConnections');
+
         });
     });
 
@@ -58,6 +64,7 @@ Route::middleware('auth:api')->group(function() {
         Route::name('tag.')->group(function () {
             Route::get('/tags', 'index')->name('get');
             Route::post('/tags', 'store')->name('store');
+            Route::get('/tags/{tag_id}', 'edit')->name('detail');
             Route::put('/tags/{tag_id}', 'update')->name('update');
             Route::delete('tags/{tag_id}', 'delete')->name('delete');
         });

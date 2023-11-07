@@ -24,35 +24,47 @@ class ConnectionController extends Controller
         ], StatusResponse::SUCCESS);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+
+    public function update(Request $request)
     {
-        //
+        return $this->connectionService->update($request->get('ids') ?? [], $request->get('data') ?? []);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $this->connectionService->delete($request->get('ids') ?? []);
+    }
+
+    public function merge(Request $request) {
+        $result = $this->connectionService->merge($request->get('ids') ?? [], $request->get('main') ?? null);
+        return response()->json([
+            'message'=> $result ? 'Merge connection successfull' : 'Merge connection fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function addTags(Request $request) {
+        $result = $this->connectionService->addTagsToConnections($request->get('tagIds') ?? [], $request->get('connectionIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Add tags successfully' : 'Add tags fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function deleteTags(Request $request)
+    {
+        $result = $this->connectionService->deleteTagsToConnections($request->get('tagIds') ?? [], $request->get('connectionIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete connection tags successfully' : 'Delete connection tags fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }
