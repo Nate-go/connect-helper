@@ -150,7 +150,22 @@ class ConnectionService extends BaseService
                 }
             }
         }
+        return true;
+    }
 
+    public function deleteTagsToConnections($tagIds, $connectionIds)
+    {
+        if (count($tagIds) == 0 or count($connectionIds) == 0)
+            return false;
+
+        foreach ($connectionIds as $connectionId) {
+            foreach ($tagIds as $tagId) {
+                $connection_tags = ConnectionTag::where('connection_id', $connectionId)->where('tag_id', $tagId)->first();
+                if ($connection_tags) {
+                    ConnectionTag::where('tag_id', $tagId)->where('connection_id', $connectionId)->delete();
+                }
+            }
+        }
         return true;
     }
 
