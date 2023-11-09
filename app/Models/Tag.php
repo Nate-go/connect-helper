@@ -25,7 +25,7 @@ class Tag extends Model
 
     public function connections(): BelongsToMany
     {
-        return $this->belongsToMany(Connection::class, 'connection_tags', 'tag_id', 'connection_id');
+        return $this->belongsToMany(Connection::class, 'connection_tags')->whereNull('connection_tags.deleted_at');
     }
 
     public function connectionTags() : HasMany

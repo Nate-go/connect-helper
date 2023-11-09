@@ -45,5 +45,7 @@ class TagService extends BaseService
             $tag->deleteConnectionTags();
             $tag->delete();
         }
+
+        return true;
     }
 }

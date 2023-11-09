@@ -19,7 +19,6 @@ class ConnectionController extends Controller
     {
         $data = $this->connectionService->getConnections($request->all());
         return response()->json([
-            'message' => 'Get connection successfully',
             'data' => $data
         ], StatusResponse::SUCCESS);
     }
@@ -38,12 +37,18 @@ class ConnectionController extends Controller
 
     public function update(Request $request)
     {
-        return $this->connectionService->update($request->get('ids') ?? [], $request->get('data') ?? []);
+        $result =  $this->connectionService->update($request->get('ids') ?? [], $request->get('data') ?? []);
+        return response()->json([
+            'message' => $result ? 'Update connection successfull' : 'Update connection fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     public function destroy(Request $request)
     {
-        $this->connectionService->delete($request->get('ids') ?? []);
+        $result = $this->connectionService->delete($request->get('ids') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete connection successfull' : 'Delete connection fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     public function merge(Request $request) {

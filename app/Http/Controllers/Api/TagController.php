@@ -53,11 +53,17 @@ class TagController extends Controller
 
     public function update(Request $request, string $id)
     {
-        return $this->tagService->update($id, $request->all());
+        $result =  $this->tagService->update([$id], $request->all());
+        return response()->json([
+            'message' => $result ? 'Update tags successfully' : 'Update tags fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    public function delete(string $id)
+    public function destroy(Request $request)
     {
-        return $this->tagService->delete($id);
+        $result=  $this->tagService->delete($request->get('ids') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete tags successfully' : 'Delete tags fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }

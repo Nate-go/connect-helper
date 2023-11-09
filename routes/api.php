@@ -66,7 +66,7 @@ Route::middleware('auth:api')->group(function() {
             Route::post('/tags', 'store')->name('store');
             Route::get('/tags/{tag_id}', 'edit')->name('detail');
             Route::put('/tags/{tag_id}', 'update')->name('update');
-            Route::delete('tags/{tag_id}', 'delete')->name('delete');
+            Route::delete('tags', 'destroy')->name('delete');
         });
     });
 
