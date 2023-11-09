@@ -6,6 +6,7 @@ use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Constants\UserConstant\UserVerifyTime;
+use App\Http\Resources\UserInformation;
 use App\Jobs\SendMailQueue;
 use App\Jobs\SetupDataForUser;
 
@@ -181,7 +182,7 @@ class AuthenService
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user()
+            'user' => json_decode(json_encode(new UserInformation(auth()->user())))
         ], StatusResponse::SUCCESS);
     }
 
