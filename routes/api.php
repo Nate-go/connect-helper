@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +24,7 @@ Route::get('/unauthenticated', [AuthenController::class, 'throwAuthenError'])->n
 Route::get('/unauthorized', [AuthenController::class, 'throwAuthorError'])->name('auth.authorError');
 Route::post('/send-verify', [AuthenController::class, 'sendVerify'])->name('sendVerify');
 Route::post('/active-account', [AuthenController::class, 'activeAccount'])->name('activeAccount');
+Route::post('/refresh', [AuthenController::class, 'refresh'])->name('refresh');
 
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/google', [AuthenController::class, 'redirectToGoogle']);
@@ -42,7 +42,6 @@ Route::middleware('auth:api')->group(function() {
     Route::controller(AuthenController::class)->group(function () {
         Route::name('auth.')->group(function () {
             Route::post('/logout', 'logout')->name('logout');
-            Route::post('/refresh', 'refresh')->name('refresh');
             Route::post('/reset-pass', 'resetPassWord')->name('resetPassword');
             Route::get('/user-profile', 'getUserProfile')->name('getUserProfile');
         });
