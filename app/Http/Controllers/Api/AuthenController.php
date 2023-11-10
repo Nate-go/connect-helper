@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthenFormRequests\ChangePasswordFormRequest;
 use App\Http\Requests\AuthenFormRequests\LoginFormRequest;
+use App\Http\Requests\AuthenFormRequests\RefreshFormRequest;
 use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
@@ -45,9 +47,15 @@ class AuthenController extends Controller
         return $this->authenService->throwAuthorError();
     }
 
-    public function refresh()
+    public function refresh(RefreshFormRequest $request)
     {
-        return $this->authenService->refresh();
+        $result =  $this->authenService->refresh($request->get('remember_token'));
+        if(!$result) {
+            return response()->json([
+                'error'=> 'Can not find out this remember token',
+            ], StatusResponse::ERROR);
+        }
+        return response()->json($result, StatusResponse::SUCCESS);
     }
 
     public function getUserProfile()
@@ -57,7 +65,7 @@ class AuthenController extends Controller
 
     protected function createNewToken($token)
     {
-        return $this->authenService->createNewToken($token);
+        return $this->authenService->createNewToken($token, null);
     }
 
     public function resetPassWord(ChangePasswordFormRequest $request)

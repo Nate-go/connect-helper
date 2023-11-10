@@ -2,6 +2,7 @@
 
 namespace App\Services\BusinessServices;
 
+use App\Constants\AuthenConstant\EncryptionKey;
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
@@ -17,8 +18,11 @@ use App\Services\ModelServices\GmailTokenService;
 use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
 use Hash;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\JWTAuth;
 
 
 class AuthenService
@@ -44,12 +48,39 @@ class AuthenService
     }
 
     public function login($input) {
-       
-        if (!$token = auth()->attempt($input)) {
+        $remember = $input['remember'] ?? false;
+        $rememberToken = null;
+        $credentials = ['email'=> $input['email'],'password'=> $input['password']];
+
+        if (!$token = auth()->attempt($credentials)) {
             return response()->json(["message" => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
         }
 
-        return $this->createNewToken($token);
+        if ($remember) {
+            $rememberToken = $this->encryptToken(array_merge(
+                $credentials, 
+                [
+                    'remember' => true,
+                    'time' => now()
+                ]
+            ));
+        }
+
+        return $this->createNewToken($token, $rememberToken);
+    }
+
+    private function encryptToken($data)
+    {
+        $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
+        $encryptedData = Crypto::encrypt(json_encode($data), $key);
+        return $encryptedData;
+    }
+
+    private function decryptToken($encryptedData)
+    {
+        $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
+        $decryptedData = Crypto::decrypt($encryptedData, $key);
+        return json_decode($decryptedData, true);
     }
 
     public function signup($input)
@@ -152,9 +183,16 @@ class AuthenService
         return response()->json(["message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
     }
 
-    public function refresh()
+    public function refresh($rememberToken)
     {
-        return $this->createNewToken(auth()->refresh());
+        $user = User::where("remember_token", $rememberToken)->first();
+
+        if(!$user) {
+            return false;
+        }
+
+        $data = $this->decryptToken($rememberToken);
+        return $this->login($data);
     }
 
     public function getUserProfile()
@@ -162,7 +200,7 @@ class AuthenService
         return response()->json(auth()->user(), StatusResponse::SUCCESS);
     }
 
-    protected function createNewToken($token)
+    protected function createNewToken($token, $rememberToken)
     {
         $user = auth()->user();
 
@@ -178,8 +216,12 @@ class AuthenService
             ], StatusResponse::BLOCKED_ACCOUNT);
         }
 
+        $user->remember_token = $rememberToken;
+        $user->save();
+
         return response()->json([
             'access_token' => $token,
+            'remember_token' => $rememberToken,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => json_decode(json_encode(new UserInformation(auth()->user())))
