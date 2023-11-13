@@ -64,7 +64,7 @@ class ConnectionService extends BaseService
 
     public function setUp($user) {
         if (is_numeric($user)) {
-            $user = $this->getFirst($user);
+            $user = User::where('id', $user)->first();
         }
 
         $this->setConnectionUser($user, $user->name, $user->email);
@@ -72,7 +72,6 @@ class ConnectionService extends BaseService
         $service = $this->gmailTokenService->getGmailService($user);
 
         $messages = $service->users_messages->listUsersMessages('me', ['labelIds' => 'SENT']);
-
         $recipients = [];
 
         foreach ($messages->getMessages() as $message) {

@@ -25,10 +25,13 @@ Route::get('/unauthorized', [AuthenController::class, 'throwAuthorError'])->name
 Route::post('/send-verify', [AuthenController::class, 'sendVerify'])->name('sendVerify');
 Route::post('/active-account', [AuthenController::class, 'activeAccount'])->name('activeAccount');
 Route::post('/refresh', [AuthenController::class, 'refresh'])->name('refresh');
+Route::post('/test', [AuthenController::class, 'test'])->name('test');
+
 
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/google', [AuthenController::class, 'redirectToGoogle']);
     Route::get('/google/callback', [AuthenController::class, 'handleGoogleCallback']);
+    Route::get('/google/token', [AuthenController::class, 'getGoogleToken']);
 });
 
 Route::middleware('auth:api')->group(function() {

@@ -14,9 +14,8 @@ class GmailToken extends Model
     protected $fillable = [
         "user_id",
         "access_token",
-        "expires_in",
-        "scope", 
-        "token_type",
+        "expired_at",
+        "refresh_token"
     ] ;
 
     public function user(): BelongsTo

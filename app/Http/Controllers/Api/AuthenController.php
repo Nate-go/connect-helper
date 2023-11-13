@@ -11,15 +11,20 @@ use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
 use App\Services\BusinessServices\AuthenService;
+use App\Services\ModelServices\ConnectionService;
+use Http;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenController extends Controller
 {
     protected $authenService;
+    protected $connectionService;
 
-    public function __construct(AuthenService $authenService)
+    public function __construct(AuthenService $authenService, ConnectionService $connectionService)
     {
         $this->authenService = $authenService; 
+        $this->connectionService = $connectionService;
     }
 
     public function login(LoginFormRequest $request)
@@ -81,13 +86,7 @@ class AuthenController extends Controller
         return $this->authenService->activeAccount($request->all());
     }
 
-    public function redirectToGoogle()
-    {
-        return $this->authenService->redirectToGoogle();
-    }
-
-    public function handleGoogleCallback(Request $request)
-    {
-        return $this->authenService->handleGoogleCallback($request);
+    public function test(Request $request) {
+        $this->connectionService->setUp(1);
     }
 }

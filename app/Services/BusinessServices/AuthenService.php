@@ -20,6 +20,7 @@ use DateInterval;
 use DateTime;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
+use Google_Client;
 use Hash;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\JWTAuth;
@@ -34,6 +35,8 @@ class AuthenService
     protected $gmailTokenService;
 
     protected $connectionService;
+
+    protected $tokenRespone = [];
 
     public function __construct(
             EnterpriseService $enterpriseService, 
@@ -86,9 +89,9 @@ class AuthenService
     public function signup($input)
     {
         $gmailToken = $input['gmail_token'];
-        $email = $this->gmailTokenService->getEmailFromToken($gmailToken['access_token']);
+        $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
 
-        if ($this->userService->isEmailExist($email)) {
+        if ($this->userService->isEmailExist($data['email'])) {
             return response()->json([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
@@ -106,16 +109,20 @@ class AuthenService
 
         $user = $this->userService->create([
             'enterprise_id' => $enterprise->id,
-            'email' => $email,
+            'email' => $data['email'],
             'name' => $input['name'],
             'password' => Hash::make($input['password']),
             'role' => UserRole::OWNER,
             'status' => UserStatus::ACTIVE,
+            'image_url' => $data['picture']
         ]);
 
         $this->gmailTokenService->create(array_merge(
                 $gmailToken, 
-                ['user_id' => $user->id]
+                [
+                    'user_id' => $user->id,
+                    'expiresed_at' => now()->addSeconds($gmailToken['expires_in'])
+                ]
             )
         );
 
@@ -292,44 +299,4 @@ class AuthenService
 
         return null;
     }
-
-    public function redirectToGoogle()
-    {
-        $service = $this->gmailTokenService->getGmailService(2);
-
-        $this->connectionService->setUp($service);
-    }
-
-    // public function redirectToGoogle()
-    // {
-    //     $client = new Google_Client();
-    //     $client->setClientId(env('GOOGLE_CLIENT_ID'));
-    //     $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-    //     $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
-    //     $client->addScope('email');
-    //     $client->addScope('profile');
-    //     $client->setAccessType('offline'); // Add this line
-
-    //     dd($client->createAuthUrl());
-    //     return redirect($client->createAuthUrl());
-    // }
-
-    // public function handleGoogleCallback(Request $request)
-    // {
-    //     $client = new Google_Client();
-    //     $client->setClientId(env('GOOGLE_CLIENT_ID'));
-    //     $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-    //     $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
-    //     $client->addScope('email');
-    //     $client->addScope('profile');
-
-    //     $client->authenticate($request->get('code'));
-    //     $accessToken = $client->getAccessToken();
-
-    //     dd($accessToken);
-
-    //     // $accessToken contains the access token and refresh token
-
-    //     return response()->json($accessToken);
-    // }
 }
