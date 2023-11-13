@@ -22,14 +22,14 @@ class GmailTokenService extends BaseService
         }
 
         $accessToken = $user->gmailToken->access_token;
-        $expiresedAt = $user->gmailToken->expiresed_at;
+        $expiredAt = $user->gmailToken->expired_at;
 
-        if (now() >= $expiresedAt) {
+        if (now() >= $expiredAt) {
             $newAccessToken = $this->refreshAccessToken($user->gmailToken->refresh_token);
 
             $user->gmailToken->update([
                 'access_token' => $newAccessToken['access_token'],
-                'expiresed_at' => now()->addSeconds($newAccessToken['expires_in']),
+                'expired_at' => now()->addSeconds($newAccessToken['expires_in']),
             ]);
 
             return $newAccessToken['access_token'];

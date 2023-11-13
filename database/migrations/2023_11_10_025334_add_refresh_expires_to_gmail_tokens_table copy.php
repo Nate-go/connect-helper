@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('gmail_tokens', function (Blueprint $table) {
             $table->string('refresh_token')->nullable();
-            $table->timestamp('expiresed_at')->nullable();
+            $table->timestamp('expired_at')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('refresh_token');
-            $table->dropColumn('expiresed_at');
+            $table->dropColumn('expired_at');
         });
     }
 
