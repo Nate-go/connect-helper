@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('gmail_tokens', function (Blueprint $table) {
             $table->dropColumn('refresh_token');
             $table->dropColumn('expired_at');
         });

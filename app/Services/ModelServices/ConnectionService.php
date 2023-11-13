@@ -22,12 +22,21 @@ class ConnectionService extends BaseService
     protected $contactService;
 
     protected $enterpriseService;
+
+    protected $connectionHistoryService;
     
-    public function __construct(Connection $connection, GmailTokenService $gmailTokenService, ContactService $contactService, EnterpriseService $enterpriseService) {
+    public function __construct(
+        Connection $connection, 
+        GmailTokenService $gmailTokenService, 
+        ContactService $contactService, 
+        EnterpriseService $enterpriseService,
+        ConnectionHistoryService $connectionHistoryService
+    ) {
         $this->model = $connection;
         $this->gmailTokenService = $gmailTokenService;
         $this->contactService = $contactService;
         $this->enterpriseService = $enterpriseService;
+        $this->connectionHistoryService = $connectionHistoryService;
     }
 
     public function getConnections($input) {
@@ -67,9 +76,9 @@ class ConnectionService extends BaseService
             $user = User::where('id', $user)->first();
         }
 
-        $this->setConnectionUser($user, $user->name, $user->email);
-        
         $service = $this->gmailTokenService->getGmailService($user);
+
+        $this->setConnectionUser($user, $user->name, $user->email);
 
         $messages = $service->users_messages->listUsersMessages('me', ['labelIds' => 'SENT']);
         $recipients = [];
@@ -92,6 +101,8 @@ class ConnectionService extends BaseService
         foreach ($recipients as $email => $name) {
             $this->setConnectionUser($user, $name, $email);
         }
+
+        $this->setUpConnectionHistory($user, $service);
     }
 
     private function setConnectionUser($user, $name, $email) {
@@ -166,6 +177,16 @@ class ConnectionService extends BaseService
             }
         }
         return true;
+    }
+
+    public function setUpConnectionHistory($user, $service) {
+        $connections = $user->connections;
+        foreach($connections as $connection) {
+            $mailContacts = $connection->mailContacts;
+            foreach($mailContacts as $mailContact) {
+                $this->connectionHistoryService->setUp($user, $mailContact, $service);
+            }
+        }
     }
 
 }

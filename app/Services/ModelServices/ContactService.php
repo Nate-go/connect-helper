@@ -8,4 +8,6 @@ class ContactService extends BaseService
     public function __construct(Contact $contact) {
         $this->model = $contact;
     }
+
+
 }
