@@ -10,6 +10,7 @@ use App\Http\Requests\AuthenFormRequests\RefreshFormRequest;
 use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
+use App\Models\Connection;
 use App\Models\User;
 use App\Services\BusinessServices\AuthenService;
 use App\Services\ModelServices\ConnectionService;
@@ -88,6 +89,6 @@ class AuthenController extends Controller
     }
 
     public function test(Request $request) {
-        return User::where('id', 1)->first()->connections[1]->histories;
+        return array(array_diff([1, 2, 3, 5, 4], [2, 3, 4]));
     }
 }

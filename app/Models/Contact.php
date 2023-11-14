@@ -14,11 +14,17 @@ class Contact extends Model
     protected $fillable = [
         'connection_id',
         'type',
-        'content'
+        'content',
+        'title'
     ];
 
     public function histories(): HasMany
     {
         return $this->hasMany(ConnectionHistory::class);
+    }
+
+    public function deleteHistories() 
+    {
+        $this->histories()->delete();
     }
 }

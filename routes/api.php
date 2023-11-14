@@ -3,6 +3,7 @@
 use App\Constants\UserConstant\UserRole;
 use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -51,24 +52,34 @@ Route::middleware('auth:api')->group(function() {
     });
 
     Route::controller(ConnectionController::class)->group(function () {
-        Route::name('connection.')->group(function () {
-            Route::get('/connections', 'index')->name('getConnections');
-            Route::delete('/connections', 'destroy')->name('deleteConnections');
-            Route::get('/connections/merge', 'merge')->name('megreConnections');
-            Route::put('/connections', 'update')->name('updateConnections');
-            Route::post('/connections/addTags', 'addTags')->name('addTagToConnections');
-            Route::post('/connections/deleteTags', 'deleteTags')->name('deleteTagToConnections');
-
+        Route::prefix('connections')->name('connection.')->group(function () {
+            Route::get('', 'index')->name('getConnections');
+            Route::delete('', 'destroy')->name('deleteConnections');
+            Route::get('/merge', 'merge')->name('megreConnections');
+            Route::get('/{connectionId}', 'show')->name('showConnection');
+            Route::put('', 'update')->name('updateConnections');
+            Route::post('/addTags', 'addTags')->name('addTagToConnections');
+            Route::post('/deleteTags', 'deleteTags')->name('deleteTagToConnections');
+            Route::post('', 'store')->name('createConnection');
+            Route::put('/{connectionId}', 'edit')->name('editConnection');
+            Route::get('/{connectionId}/contacts', 'getContacts')->name('getContacts');
         });
     });
 
     Route::controller(TagController::class)->group(function () {
-        Route::name('tag.')->group(function () {
-            Route::get('/tags', 'index')->name('get');
-            Route::post('/tags', 'store')->name('store');
-            Route::get('/tags/{tag_id}', 'edit')->name('detail');
-            Route::put('/tags/{tag_id}', 'update')->name('update');
-            Route::delete('tags', 'destroy')->name('delete');
+        Route::prefix('tags')->name('tag.')->group(function () {
+            Route::get('', 'index')->name('get');
+            Route::post('', 'store')->name('store');
+            Route::get('/{tag_id}', 'edit')->name('detail');
+            Route::put('/{tag_id}', 'update')->name('update');
+            Route::delete('', 'destroy')->name('delete');
+        });
+    });
+
+    Route::controller(ContactController::class)->group(function () {
+        Route::prefix('contacts')->name('contact.')->group(function () {
+            Route::put('/{tag_id}', 'update')->name('update');
+            Route::delete('/{tag_id}', 'destroy')->name('delete');
         });
     });
 

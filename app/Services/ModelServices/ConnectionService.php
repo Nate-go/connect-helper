@@ -8,6 +8,7 @@ use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
 use App\Constants\UtilConstant;
 use App\Http\Resources\ConnectionResource;
+use App\Http\Resources\ShowConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionTag;
 use App\Models\ConnectionUser;
@@ -120,6 +121,7 @@ class ConnectionService extends BaseService
             'connection_id' => $connection->id,
             'content' => $email,
             'type' => ContactType::MAIL,
+            'title' => 'Default'
         ]);
 
         $this->createConnectionUser($user, $connection);
@@ -172,7 +174,7 @@ class ConnectionService extends BaseService
             foreach ($tagIds as $tagId) {
                 $connection_tags = ConnectionTag::where('connection_id', $connectionId)->where('tag_id', $tagId)->first();
                 if ($connection_tags) {
-                    ConnectionTag::where('tag_id', $tagId)->where('connection_id', $connectionId)->delete();
+                    $connection_tags->delete();
                 }
             }
         }
@@ -187,6 +189,67 @@ class ConnectionService extends BaseService
                 $this->connectionHistoryService->setUp($user, $mailContact, $service);
             }
         }
+    }
+
+    public function createConnection($input) {
+        $tagIds = $input['tagIds'];
+        $data = $input['data'];
+
+        $connection = $this->create(array_merge(
+            $data, 
+            [
+                'user_id' => auth()->user()->id,
+                'enterprise_id' => auth()->user()->enterprise_id
+            ]
+        ));
+
+        if(!$connection) return false;
+
+        $this->addTagsToConnections($tagIds, [$connection->id]);
+
+        return true;
+    }
+
+    public function showConnection($id) {
+        $connection = $this->model->where('id', $id)->first();
+
+        if(!$connection) return false;
+
+        return new ShowConnectionResource($connection);
+    }
+
+    public function editConnection($id, $input) {
+        $connection = $this->model->where('id', $id)->first();
+
+        if (!$connection) return false;
+
+        $name = $input['name'];
+        $note = $input['note'];
+        $status = $input['status'];
+        $tagIds = $input['tagIds'];
+
+        $connection->update([
+            'name'=> $name,
+            'note' => $note,
+            'status' => $status
+        ]);
+
+        $currentTagIds = $connection->tags()->pluck('tags.id')->toArray();
+        $this->deleteTagsToConnections(array_diff($currentTagIds, $tagIds), [$id]);
+        $this->addTagsToConnections(array_diff($tagIds, $currentTagIds), [$id]);
+
+        return true;
+    }
+
+    public function getContacts($connectionId) {
+        $connection = $this->model->where('id', $connectionId)->first();
+
+        if(!$connection) return false;
+
+        return [
+            'contacts' => $connection->contacts,
+            'histories' => $connection->histories
+        ];
     }
 
 }
