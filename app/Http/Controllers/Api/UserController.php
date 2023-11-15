@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ModelServices\UserService;
@@ -52,5 +53,10 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getCoworkers() 
+    {
+        return response()->json($this->userService->getCoworkers(auth()->user()), StatusResponse::SUCCESS);
     }
 }

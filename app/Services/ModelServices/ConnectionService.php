@@ -8,6 +8,8 @@ use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
 use App\Constants\UtilConstant;
 use App\Http\Resources\ConnectionResource;
+use App\Http\Resources\ContactDataResource;
+use App\Http\Resources\ShowConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionTag;
 use App\Models\ConnectionUser;
@@ -22,12 +24,21 @@ class ConnectionService extends BaseService
     protected $contactService;
 
     protected $enterpriseService;
+
+    protected $connectionHistoryService;
     
-    public function __construct(Connection $connection, GmailTokenService $gmailTokenService, ContactService $contactService, EnterpriseService $enterpriseService) {
+    public function __construct(
+        Connection $connection, 
+        GmailTokenService $gmailTokenService, 
+        ContactService $contactService, 
+        EnterpriseService $enterpriseService,
+        ConnectionHistoryService $connectionHistoryService
+    ) {
         $this->model = $connection;
         $this->gmailTokenService = $gmailTokenService;
         $this->contactService = $contactService;
         $this->enterpriseService = $enterpriseService;
+        $this->connectionHistoryService = $connectionHistoryService;
     }
 
     public function getConnections($input) {
@@ -67,9 +78,9 @@ class ConnectionService extends BaseService
             $user = User::where('id', $user)->first();
         }
 
-        $this->setConnectionUser($user, $user->name, $user->email);
-        
         $service = $this->gmailTokenService->getGmailService($user);
+
+        $this->setConnectionUser($user, $user->name, $user->email);
 
         $messages = $service->users_messages->listUsersMessages('me', ['labelIds' => 'SENT']);
         $recipients = [];
@@ -92,13 +103,14 @@ class ConnectionService extends BaseService
         foreach ($recipients as $email => $name) {
             $this->setConnectionUser($user, $name, $email);
         }
+
+        $this->setUpConnectionHistory($user, $service);
     }
 
     private function setConnectionUser($user, $name, $email) {
         $connection = $this->create([
             'name' => $name,
             'note' => $email,
-            'type' => ConnectionType::PERSON,
             'status' => ConnectionStatus::PRIVATE,
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id
@@ -109,6 +121,7 @@ class ConnectionService extends BaseService
             'connection_id' => $connection->id,
             'content' => $email,
             'type' => ContactType::MAIL,
+            'title' => 'Default'
         ]);
 
         $this->createConnectionUser($user, $connection);
@@ -161,11 +174,116 @@ class ConnectionService extends BaseService
             foreach ($tagIds as $tagId) {
                 $connection_tags = ConnectionTag::where('connection_id', $connectionId)->where('tag_id', $tagId)->first();
                 if ($connection_tags) {
-                    ConnectionTag::where('tag_id', $tagId)->where('connection_id', $connectionId)->delete();
+                    $connection_tags->delete();
                 }
             }
         }
         return true;
+    }
+
+    public function setUpConnectionHistory($user, $service) {
+        $connections = $user->connections;
+        foreach($connections as $connection) {
+            $mailContacts = $connection->mailContacts;
+            foreach($mailContacts as $mailContact) {
+                $this->connectionHistoryService->setUp($user, $mailContact, $service);
+            }
+        }
+    }
+
+    public function createConnection($input) {
+        $tagIds = $input['tagIds'];
+        $data = $input['data'];
+
+        $connection = $this->create(array_merge(
+            $data, 
+            [
+                'user_id' => auth()->user()->id,
+                'enterprise_id' => auth()->user()->enterprise_id
+            ]
+        ));
+
+        if(!$connection) return false;
+
+        $this->addTagsToConnections($tagIds, [$connection->id]);
+
+        return true;
+    }
+
+    public function showConnection($id) {
+        $connection = $this->model->where('id', $id)->first();
+
+        if(!$connection) return false;
+
+        return new ShowConnectionResource($connection);
+    }
+
+    public function editConnection($id, $input) {
+        $connection = $this->model->where('id', $id)->first();
+
+        if (!$connection) return false;
+
+        $name = $input['name'];
+        $note = $input['note'];
+        $status = $input['status'];
+        $tagIds = $input['tagIds'];
+
+        $connection->update([
+            'name'=> $name,
+            'note' => $note,
+            'status' => $status
+        ]);
+
+        $currentTagIds = $connection->tags()->pluck('tags.id')->toArray();
+        $this->deleteTagsToConnections(array_diff($currentTagIds, $tagIds), [$id]);
+        $this->addTagsToConnections(array_diff($tagIds, $currentTagIds), [$id]);
+
+        return true;
+    }
+
+    public function getContacts($connectionId) {
+        $connection = $this->model->where('id', $connectionId)->first();
+
+        if(!$connection) return false;
+
+        return new ContactDataResource($connection);
+    }
+
+    public function test() {
+        $user = User::where('id', 1)->first();
+        $service = $this->gmailTokenService->getGmailService($user);
+
+        $query = "trainergoldenowl.asia&isrefinement=true";
+        try {
+            $messages = $service->users_messages->listUsersMessages('me', ['q' => $query])->getMessages();
+            dd(count($messages));
+            foreach ($messages as $message) {
+                $messageDetail = $service->users_messages->get('me', $message->getId());
+                // dump($messageDetail);
+                $headers = $messageDetail->getPayload()->getHeaders();
+                $sentTime = null;
+                foreach ($headers as $header) {
+                    // if ($header->name == 'Date') {
+                    //     $sentTime = Carbon::parse($header->value)->toDateTime()->format('Y-m-d H:i:s');
+                    //     break;
+                    // }
+                    if ($header->name == 'From') {
+                        dump($header->value);
+                        break;
+                    }
+                }
+
+                // $this->model->create([
+                //     'user_id' => $user->id,
+                //     'contact_id' => $contact->id,
+                //     'contacted_at' => $sentTime,
+                //     'type' => ConnectionHistoryType::SEND
+                // ]);
+            }
+            dd($messages);
+
+        } catch (\Exception $e) {
+        }
     }
 
 }

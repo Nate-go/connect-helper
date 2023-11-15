@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contact extends Model
@@ -13,6 +14,17 @@ class Contact extends Model
     protected $fillable = [
         'connection_id',
         'type',
-        'content'
+        'content',
+        'title'
     ];
+
+    public function histories(): HasMany
+    {
+        return $this->hasMany(ConnectionHistory::class)->orderBy('contacted_at', 'desc');
+    }
+
+    public function deleteHistories() 
+    {
+        $this->histories()->delete();
+    }
 }

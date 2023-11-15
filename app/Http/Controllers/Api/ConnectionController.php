@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConnectionFormRequests\EditConnectionFormRequest;
+use App\Http\Requests\ConnectionFormRequests\StoreConnectionFormRequest;
 use App\Services\ModelServices\ConnectionService;
 use Illuminate\Http\Request;
 
@@ -24,14 +26,30 @@ class ConnectionController extends Controller
     }
 
 
-    public function store(Request $request)
+    public function store(StoreConnectionFormRequest $request)
     {
-        //
+        $result = $this->connectionService->createConnection($request->all());
+        return response()->json([
+            'message' => $result ? 'Create connection successfull' : 'Create connection fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     public function show(string $id)
     {
+        $result = $this->connectionService->showConnection($id);
+        if(!$result) {
+            return response()->json([
+                'message' => 'Can not find out this connection',
+            ], StatusResponse::ERROR);
+        }
+        return response()->json($result, StatusResponse::SUCCESS);
+    }
 
+    public function edit(string $id, EditConnectionFormRequest $request) {
+        $result = $this->connectionService->editConnection($id, $request->all());
+        return response()->json([
+            'message' => $result ? 'Update connection successfull' : 'Update connection fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
 
@@ -71,5 +89,15 @@ class ConnectionController extends Controller
         return response()->json([
             'message' => $result ? 'Delete connection tags successfully' : 'Delete connection tags fail'
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function getContacts(string $connectionId) {
+        $result = $this->connectionService->getContacts($connectionId);
+        if (!$result) {
+            return response()->json([
+                'message' => 'Can not find out this connection',
+            ], StatusResponse::ERROR);
+        }
+        return response()->json($result, StatusResponse::SUCCESS);
     }
 }

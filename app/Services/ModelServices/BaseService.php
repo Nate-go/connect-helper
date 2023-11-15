@@ -15,7 +15,13 @@ class BaseService {
     }
 
     public function update($ids, $data) {
-        return $this->model->whereIn('id', $ids)->update($data);
+        try {
+            $this->model->whereIn('id', $ids)->update($data);
+        }
+        catch (\Exception $e) {
+            return false;
+        }
+        return true;
     }
 
     public function delete($ids) {

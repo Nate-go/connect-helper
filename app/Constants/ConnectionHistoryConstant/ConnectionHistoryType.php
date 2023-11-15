@@ -8,7 +8,5 @@ class ConnectionHistoryType extends BaseConstant
 {
     const SEND = 0;
 
-    const DO = 1;
-
-    const RECEIVE = 2;
+    const RECEIVE = 1;
 }

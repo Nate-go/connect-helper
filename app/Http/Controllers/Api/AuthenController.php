@@ -10,6 +10,8 @@ use App\Http\Requests\AuthenFormRequests\RefreshFormRequest;
 use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
+use App\Models\Connection;
+use App\Models\User;
 use App\Services\BusinessServices\AuthenService;
 use App\Services\ModelServices\ConnectionService;
 use Http;
@@ -87,6 +89,6 @@ class AuthenController extends Controller
     }
 
     public function test(Request $request) {
-        $this->connectionService->setUp(1);
+        $this->connectionService->test();
     }
 }
