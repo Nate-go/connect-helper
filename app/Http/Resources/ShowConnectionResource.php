@@ -19,6 +19,7 @@ class ShowConnectionResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
                 'image_url' => $this->user->image_url,
+                'email' => $this->user->email
             ],
             'created_at' => $this->created_at,
             'tags' => $this->tags->where('user_id', auth()->user()->id)->map(function($tag) {
@@ -31,6 +32,8 @@ class ShowConnectionResource extends JsonResource
                 return [
                     'id' => $user->id,
                     'name'=> $user->name,
+                    'image_url' => $user->image_url,
+                    'email' => $user->email
                 ];
             }),
         ];

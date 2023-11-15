@@ -19,11 +19,9 @@ class Connection extends Model
     protected $fillable = [
         'name', 
         'note',
-        'type',
         'status',
         'user_id',
         'enterprise_id'
-
     ];
 
     public function user() : BelongsTo

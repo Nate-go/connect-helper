@@ -8,6 +8,7 @@ use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
 use App\Constants\UtilConstant;
 use App\Http\Resources\ConnectionResource;
+use App\Http\Resources\ContactDataResource;
 use App\Http\Resources\ShowConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionTag;
@@ -110,7 +111,6 @@ class ConnectionService extends BaseService
         $connection = $this->create([
             'name' => $name,
             'note' => $email,
-            'type' => ConnectionType::PERSON,
             'status' => ConnectionStatus::PRIVATE,
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id
@@ -246,10 +246,44 @@ class ConnectionService extends BaseService
 
         if(!$connection) return false;
 
-        return [
-            'contacts' => $connection->contacts,
-            'histories' => $connection->histories
-        ];
+        return new ContactDataResource($connection);
+    }
+
+    public function test() {
+        $user = User::where('id', 1)->first();
+        $service = $this->gmailTokenService->getGmailService($user);
+
+        $query = "trainergoldenowl.asia&isrefinement=true";
+        try {
+            $messages = $service->users_messages->listUsersMessages('me', ['q' => $query])->getMessages();
+            dd(count($messages));
+            foreach ($messages as $message) {
+                $messageDetail = $service->users_messages->get('me', $message->getId());
+                // dump($messageDetail);
+                $headers = $messageDetail->getPayload()->getHeaders();
+                $sentTime = null;
+                foreach ($headers as $header) {
+                    // if ($header->name == 'Date') {
+                    //     $sentTime = Carbon::parse($header->value)->toDateTime()->format('Y-m-d H:i:s');
+                    //     break;
+                    // }
+                    if ($header->name == 'From') {
+                        dump($header->value);
+                        break;
+                    }
+                }
+
+                // $this->model->create([
+                //     'user_id' => $user->id,
+                //     'contact_id' => $contact->id,
+                //     'contacted_at' => $sentTime,
+                //     'type' => ConnectionHistoryType::SEND
+                // ]);
+            }
+            dd($messages);
+
+        } catch (\Exception $e) {
+        }
     }
 
 }

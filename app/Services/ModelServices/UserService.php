@@ -19,4 +19,14 @@ class UserService extends BaseService {
     public function isEmailExist($email) {
         return User::where('email', $email)->where('status', UserStatus::ACTIVE)->exists();
     }
+
+    public function getCoworkers($user) {
+        try {
+            $enterprise = $user->enterprise;
+
+            return $enterprise->users;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

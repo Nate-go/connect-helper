@@ -20,7 +20,7 @@ class Contact extends Model
 
     public function histories(): HasMany
     {
-        return $this->hasMany(ConnectionHistory::class);
+        return $this->hasMany(ConnectionHistory::class)->orderBy('contacted_at', 'desc');
     }
 
     public function deleteHistories() 

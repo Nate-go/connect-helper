@@ -79,7 +79,15 @@ Route::middleware('auth:api')->group(function() {
     Route::controller(ContactController::class)->group(function () {
         Route::prefix('contacts')->name('contact.')->group(function () {
             Route::put('/{tag_id}', 'update')->name('update');
-            Route::delete('/{tag_id}', 'destroy')->name('delete');
+            Route::delete('/{tag_id}', 'destroy')->name('delete'); 
+            Route::post('', 'store')->name('store');
+
+        });
+    });
+
+    Route::controller(UserController::class)->group(function () {
+        Route::prefix('users')->name('contact.')->group(function () {
+            Route::get('/coworkers', 'getCoworkers')->name('getCoworkers');
         });
     });
 

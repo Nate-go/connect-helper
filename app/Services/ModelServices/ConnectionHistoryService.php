@@ -12,67 +12,39 @@ class ConnectionHistoryService extends BaseService
     }
 
     public function setUp($user, $contact, $service) {
-        $this->setSentMail($user, $contact, $service);
-        $this->setReceiveMail($user, $contact, $service);
-    }
-
-    public function setSentMail($user, $contact, $service) {
-        $query = "from:($user->email) to:($contact->content)";
+        $query = "{$contact->content}";
         try {
             $messages = $service->users_messages->listUsersMessages('me', ['q' => $query])->getMessages();
             foreach ($messages as $message) {
                 $messageDetail = $service->users_messages->get('me', $message->getId());
-
                 $headers = $messageDetail->getPayload()->getHeaders();
                 $sentTime = null;
-
+                $type = ConnectionHistoryType::SEND;
                 foreach ($headers as $header) {
                     if ($header->name == 'Date') {
                         $sentTime = Carbon::parse($header->value)->toDateTime()->format('Y-m-d H:i:s');
                         break;
+                    }
+                    if ($header->name == 'From' and stripos($header->value, $contact->content)) {
+                        $type = ConnectionHistoryType::RECEIVE;
                     }
                 }
 
-                $this->model->create([
-                    'user_id'=> $user->id,
-                    'contact_id' => $contact->id,
-                    'contacted_at' => $sentTime,
-                    'type' => ConnectionHistoryType::SEND
-                ]);
-            }
-
-        } catch (\Exception $e) {
-        }
-    }
-
-    public function setReceiveMail($user, $contact, $service)
-    {
-        $query = "from:($contact->content) to:($user->email)";
-        try {
-            $messages = $service->users_messages->listUsersMessages('me', ['q' => $query])->getMessages();
-            foreach ($messages as $message) {
-                $messageDetail = $service->users_messages->get('me', $message->getId());
-
-                $headers = $messageDetail->getPayload()->getHeaders();
-                $sentTime = null;
-
-                foreach ($headers as $header) {
-                    if ($header->name == 'Date') {
-                        $sentTime = Carbon::parse($header->value)->toDateTime()->format('Y-m-d H:i:s');
-                        break;
-                    }
+                $history = $this->model->where('user_id', $user->id)->where('contact_id', $contact->id)->where('contacted_at', $sentTime)->where('type', $type)->first();
+                if ($history) {
+                    continue;
                 }
 
                 $this->model->create([
                     'user_id' => $user->id,
                     'contact_id' => $contact->id,
                     'contacted_at' => $sentTime,
-                    'type' => ConnectionHistoryType::RECEIVE
+                    'type' => $type
                 ]);
             }
 
         } catch (\Exception $e) {
-            
+
         }
     }
 }

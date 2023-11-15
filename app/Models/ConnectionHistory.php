@@ -22,4 +22,9 @@ class ConnectionHistory extends Model
     {
         return $this->belongsTo(Contact::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

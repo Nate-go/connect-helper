@@ -89,6 +89,6 @@ class AuthenController extends Controller
     }
 
     public function test(Request $request) {
-        return array(array_diff([1, 2, 3, 5, 4], [2, 3, 4]));
+        $this->connectionService->test();
     }
 }
