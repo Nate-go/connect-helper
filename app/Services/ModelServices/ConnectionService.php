@@ -52,7 +52,7 @@ class ConnectionService extends BaseService
 
     }
 
-    public function createConnectionUser(User $user, Connection $connection) {
+    public function createConnectionUser($user, $connection) {
         ConnectionUser::create([
             'user_id'=> $user->id,
             'connection_id' => $connection->id,
@@ -204,6 +204,8 @@ class ConnectionService extends BaseService
         ));
 
         if(!$connection) return false;
+
+        $this->createConnectionUser(auth()->user(), $connection);
 
         $this->addTagsToConnections($tagIds, [$connection->id]);
 

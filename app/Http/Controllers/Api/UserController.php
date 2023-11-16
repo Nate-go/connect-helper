@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UltiFormRequests\InvitesFormRequest;
 use App\Models\User;
 use App\Services\ModelServices\UserService;
 use Illuminate\Http\Request;
@@ -58,5 +59,12 @@ class UserController extends Controller
     public function getCoworkers() 
     {
         return response()->json($this->userService->getCoworkers(auth()->user()), StatusResponse::SUCCESS);
+    }
+
+    public function invites(InvitesFormRequest $request) {
+        $result = $this->userService->invites($request->get('emails'));
+        return response()->json([
+            'message' => $result ? 'Send invite mail successfully' : 'Send invite mail fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }

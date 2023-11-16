@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Services\ModelServices;
+use App\Constants\AuthenConstant\EncryptionKey;
 use App\Constants\UtilConstant;
-use App\Services\BusinessServices\FormResponseService;
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
 
 class BaseService {
     protected $model;
@@ -55,5 +57,19 @@ class BaseService {
         ];
 
         return $pagination;
+    }
+
+    protected function encryptToken($data)
+    {
+        $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
+        $encryptedData = Crypto::encrypt(json_encode($data), $key);
+        return $encryptedData;
+    }
+
+    protected function decryptToken($encryptedData)
+    {
+        $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
+        $decryptedData = Crypto::decrypt($encryptedData, $key);
+        return json_decode($decryptedData, true);
     }
 }
