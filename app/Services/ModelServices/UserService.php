@@ -43,11 +43,10 @@ class UserService extends BaseService {
             'enterprise' => $user->enterprise,
             'expired_at' => Carbon::now()->addDays(3)
         ];
-
-        $link = "https://accounts.google.com/o/oauth2/auth?client_id=359676249009-34tqpm71tj75n1t21ibcl7u2nr1kmsn3.apps.googleusercontent.com&redirect_uri="
-            . env("FE_APP_URL") .
-            "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.send%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fplus.login%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.readonly&response_type=code&prompt=select_account&access_type=offline&state="
-            . $this->encryptToken($data);
+        
+        $link = env('SIGNUP_LINK');
+        $link = str_replace("%FE_APP_URL%", env("FE_APP_URL") , $link);
+        $link = str_replace("%INVITE_TOKEN%", $this->encryptToken($data), $link);
 
         $service = $this->gmailTokenService->getGmailService($user);
 
