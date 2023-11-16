@@ -8,6 +8,7 @@ use App\Http\Requests\AuthenFormRequests\ChangePasswordFormRequest;
 use App\Http\Requests\AuthenFormRequests\LoginFormRequest;
 use App\Http\Requests\AuthenFormRequests\RefreshFormRequest;
 use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
+use App\Http\Requests\AuthenFormRequests\SignUpEmployeeFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
 use App\Models\Connection;
@@ -37,6 +38,10 @@ class AuthenController extends Controller
     public function signup(SignUpFormRequest $request)
     {
         return $this->authenService->signup($request->all());
+    }
+    
+    public function signupEmployee(SignUpEmployeeFormRequest $request) {
+        return $this->authenService->signupEmployee($request->all());
     }
 
     public function logout()
@@ -86,6 +91,16 @@ class AuthenController extends Controller
 
     public function activeAccount(VerifyAccountFormRequest $request) {
         return $this->authenService->activeAccount($request->all());
+    }
+
+    public function checkInviteToken(Request $request) {
+        $result = $this->authenService->checkInviteToken($request->get('token') ?? '');
+        if (!$result) {
+            return response()->json([
+                'message' => 'This invitation is expired or not right',
+            ], StatusResponse::ERROR);
+        }
+        return response()->json($result, StatusResponse::SUCCESS);
     }
 
     public function test(Request $request) {

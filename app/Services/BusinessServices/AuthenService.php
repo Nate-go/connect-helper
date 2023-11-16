@@ -20,10 +20,8 @@ use DateInterval;
 use DateTime;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
-use Google_Client;
 use Hash;
-use Illuminate\Http\Request;
-use Tymon\JWTAuth\JWTAuth;
+
 
 
 class AuthenService
@@ -132,6 +130,61 @@ class AuthenService
             'message' => $user ? 'User successfully registered' : 'User fail registered',
             'user' => $user
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function signupEmployee($input)
+    {
+        $enterpriseId = $this->getEnterpriseId($input['token']);
+
+        if(!$enterpriseId) {
+            return response()->json([
+                'message' => 'Token is not true',
+            ], StatusResponse::ERROR);
+        }
+
+        $gmailToken = $input['gmail_token'];
+        $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
+
+        if ($this->userService->isEmailExist($data['email'])) {
+            return response()->json([
+                'message' => 'This email has been used',
+            ], StatusResponse::ERROR);
+        }
+
+        $user = $this->userService->create([
+            'enterprise_id' => $enterpriseId,
+            'email' => $data['email'],
+            'name' => $input['name'],
+            'password' => Hash::make($input['password']),
+            'role' => UserRole::EMPLOYEE,
+            'status' => UserStatus::ACTIVE,
+            'image_url' => $data['picture']
+        ]);
+
+        $this->gmailTokenService->create(
+            array_merge(
+                $gmailToken,
+                [
+                    'user_id' => $user->id,
+                    'expiresed_at' => now()->addSeconds($gmailToken['expires_in'])
+                ]
+            )
+        );
+
+        SetupDataForUser::dispatch($user);
+
+        return response()->json([
+            'message' => $user ? 'User successfully registered' : 'User fail registered',
+            'user' => $user
+        ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    private function getEnterpriseId($token) {
+        $data = $this->decryptToken($token);
+        if (!isset($data['enterpriseId'])) {
+            return false;
+        }
+        return $data['enterpriseId'];
     }
 
     private function generateEncodedString($startTime, $endTime, $userData) {
@@ -298,5 +351,20 @@ class AuthenService
         }
 
         return null;
+    }
+
+    public function checkInviteToken($token)
+    {
+        $data = $this->decryptToken($token);
+        if (!isset($data['enterprise']) && !($data['expired_at'] > now())) {
+            return false;
+        }
+        return [
+            'enterprise' => $data['enterprise'],
+            'token' => $this->encryptToken([
+                'enterpriseId' => $data['enterprise']['id'],
+                'time' => now(),
+            ]),
+        ];
     }
 }

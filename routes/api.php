@@ -27,6 +27,8 @@ Route::post('/send-verify', [AuthenController::class, 'sendVerify'])->name('send
 Route::post('/active-account', [AuthenController::class, 'activeAccount'])->name('activeAccount');
 Route::post('/refresh', [AuthenController::class, 'refresh'])->name('refresh');
 Route::post('/test', [AuthenController::class, 'test'])->name('test');
+Route::post('/check-invite-token', [AuthenController::class, 'checkInviteToken'])->name('checkInviteToken');
+Route::post('/signup-employee', [AuthenController::class, 'signupEmployee'])->name('auth.signupEmployee');
 
 
 Route::group(['prefix' => 'auth'], function () {
@@ -81,13 +83,14 @@ Route::middleware('auth:api')->group(function() {
             Route::put('/{tag_id}', 'update')->name('update');
             Route::delete('/{tag_id}', 'destroy')->name('delete'); 
             Route::post('', 'store')->name('store');
-
         });
     });
 
     Route::controller(UserController::class)->group(function () {
         Route::prefix('users')->name('contact.')->group(function () {
             Route::get('/coworkers', 'getCoworkers')->name('getCoworkers');
+            Route::post('/invites', 'invites')->name('invites');
+            Route::get('/accept-invite', 'acceptInvite')->name('acceptInvites');
         });
     });
 
