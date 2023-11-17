@@ -100,4 +100,19 @@ class ConnectionController extends Controller
         }
         return response()->json($result, StatusResponse::SUCCESS);
     }
+
+    public function addUserConnections(Request $request) {
+        $result = $this->connectionService->addUserConnections($request->get('connectionIds') ?? [], $request->get('userIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Add user to connection successfully' : 'Add user to connection fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function deleteUserConnections(Request $request)
+    {
+        $result = $this->connectionService->deleteUserConnections($request->get('connectionIds') ?? [], $request->get('userIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete user to connection successfully' : 'Delete user to connection fail'
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
 }

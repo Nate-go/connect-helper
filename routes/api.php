@@ -65,6 +65,9 @@ Route::middleware('auth:api')->group(function() {
             Route::post('', 'store')->name('createConnection');
             Route::put('/{connectionId}', 'edit')->name('editConnection');
             Route::get('/{connectionId}/contacts', 'getContacts')->name('getContacts');
+            Route::post('/add-user-connections', 'addUserConnections')->name('addUserConnection');
+            Route::post('/delete-user-connections', 'deleteUserConnections')->name('deleteUserConnection');
+
         });
     });
 

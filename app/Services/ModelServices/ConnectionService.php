@@ -2,11 +2,8 @@
 
 namespace App\Services\ModelServices;
 
-use App\Constants\AuthenConstant\StatusResponse;
 use App\Constants\ConnectionConstant\ConnectionStatus;
-use App\Constants\ConnectionConstant\ConnectionType;
 use App\Constants\ContactConstant\ContactType;
-use App\Constants\UtilConstant;
 use App\Http\Resources\ConnectionResource;
 use App\Http\Resources\ContactDataResource;
 use App\Http\Resources\ShowConnectionResource;
@@ -52,11 +49,16 @@ class ConnectionService extends BaseService
 
     }
 
-    public function createConnectionUser($user, $connection) {
+    public function createConnectionUser($userId, $connectionId) {
         ConnectionUser::create([
-            'user_id'=> $user->id,
-            'connection_id' => $connection->id,
+            'user_id'=> $userId,
+            'connection_id' => $connectionId,
         ]);
+    }
+
+    public function deleteConnectionUser($userId, $connectionId)
+    {
+        ConnectionUser::where('user_id', $userId)->where('connection_id', $connectionId)->delete();
     }
 
     private function parseEmail($input)
@@ -124,7 +126,7 @@ class ConnectionService extends BaseService
             'title' => 'Default'
         ]);
 
-        $this->createConnectionUser($user, $connection);
+        $this->createConnectionUser($user->id, $connection->id);
     }
 
     public function merge($ids, $main) {
@@ -205,7 +207,7 @@ class ConnectionService extends BaseService
 
         if(!$connection) return false;
 
-        $this->createConnectionUser(auth()->user(), $connection);
+        $this->createConnectionUser(auth()->user()->id, $connection->id);
 
         $this->addTagsToConnections($tagIds, [$connection->id]);
 
@@ -227,13 +229,15 @@ class ConnectionService extends BaseService
 
         $name = $input['name'];
         $note = $input['note'];
+        $ownerId = $input['ownerId'];
         $status = $input['status'];
         $tagIds = $input['tagIds'];
 
         $connection->update([
             'name'=> $name,
             'note' => $note,
-            'status' => $status
+            'status' => $status,
+            'user_id' => $ownerId
         ]);
 
         $currentTagIds = $connection->tags()->pluck('tags.id')->toArray();
@@ -249,6 +253,36 @@ class ConnectionService extends BaseService
         if(!$connection) return false;
 
         return new ContactDataResource($connection);
+    }
+
+    public function addUserConnections($connectionIds, $userIds) {
+        if(count($userIds) == 0 or count($connectionIds) == 0) return false;
+
+        $connections = $this->model->whereIn('id', $connectionIds)->get();
+        foreach($connections as $connection) {
+            $addIds = array_diff($userIds, $this->getIds($connection->users));
+            foreach($addIds as $id) {
+                $this->createConnectionUser($id, $connection->id);
+            }
+        }
+
+        return true;
+    }
+
+    public function deleteUserConnections($connectionIds, $userIds)
+    {
+        if (count($userIds) == 0 or count($connectionIds) == 0)
+            return false;
+
+        $connections = $this->model->whereIn('id', $connectionIds)->get();
+        foreach ($connections as $connection) {
+            $deleteIds = array_intersect($userIds, $this->getIds($connection->users));
+            foreach ($deleteIds as $id) {
+                $this->deleteConnectionUser($id, $connection->id);
+            }
+        }
+
+        return true;
     }
 
     public function test() {
