@@ -31,7 +31,7 @@ class Connection extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'connection_users', 'connection_id', 'user_id');
+        return $this->belongsToMany(User::class, 'connection_users')->whereNull('connection_users.deleted_at');
     }
 
     public function contacts(): HasMany

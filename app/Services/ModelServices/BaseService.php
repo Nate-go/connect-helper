@@ -72,4 +72,12 @@ class BaseService {
         $decryptedData = Crypto::decrypt($encryptedData, $key);
         return json_decode($decryptedData, true);
     }
+
+    protected function getIds($data) {
+        $ids = [];
+        foreach( $data as $item ) {
+            $ids[] = $item->id;
+        }
+        return $ids;
+    }
 }
