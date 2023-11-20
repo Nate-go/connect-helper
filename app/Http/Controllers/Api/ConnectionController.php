@@ -115,4 +115,8 @@ class ConnectionController extends Controller
             'message' => $result ? 'Delete user to connection successfully' : 'Delete user to connection fail'
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
+
+    public function getUserConnections() {
+        return response()->json($this->connectionService->getUserConnections(), StatusResponse::SUCCESS);
+    }
 }

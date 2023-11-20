@@ -3,7 +3,9 @@
 use App\Constants\UserConstant\UserRole;
 use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
+use App\Http\Controllers\Api\ConnectionHistoryController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\SendMailController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +32,6 @@ Route::post('/test', [AuthenController::class, 'test'])->name('test');
 Route::post('/check-invite-token', [AuthenController::class, 'checkInviteToken'])->name('checkInviteToken');
 Route::post('/signup-employee', [AuthenController::class, 'signupEmployee'])->name('auth.signupEmployee');
 
-
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/google', [AuthenController::class, 'redirectToGoogle']);
     Route::get('/google/callback', [AuthenController::class, 'handleGoogleCallback']);
@@ -53,6 +54,13 @@ Route::middleware('auth:api')->group(function() {
         });
     });
 
+    Route::controller(ConnectionHistoryController::class)->group(function () {
+        Route::prefix('connection-histories')->name('connectionHistory.')->group(function () {
+            Route::put('/{connectionId}', 'updateConnection')->name('updateConnection');
+            Route::put('', 'updateUserConnection')->name('updateUserConnection');
+        });
+    });
+
     Route::controller(ConnectionController::class)->group(function () {
         Route::prefix('connections')->name('connection.')->group(function () {
             Route::get('', 'index')->name('getConnections');
@@ -67,7 +75,7 @@ Route::middleware('auth:api')->group(function() {
             Route::get('/{connectionId}/contacts', 'getContacts')->name('getContacts');
             Route::post('/add-user-connections', 'addUserConnections')->name('addUserConnection');
             Route::post('/delete-user-connections', 'deleteUserConnections')->name('deleteUserConnection');
-
+            Route::get('/user-connections/useable', 'getUserConnections')->name('getUserConnection');
         });
     });
 
@@ -90,10 +98,16 @@ Route::middleware('auth:api')->group(function() {
     });
 
     Route::controller(UserController::class)->group(function () {
-        Route::prefix('users')->name('contact.')->group(function () {
+        Route::prefix('users')->name('user.')->group(function () {
             Route::get('/coworkers', 'getCoworkers')->name('getCoworkers');
             Route::post('/invites', 'invites')->name('invites');
             Route::get('/accept-invite', 'acceptInvite')->name('acceptInvites');
+        });
+    });
+
+    Route::controller(SendMailController::class)->group(function () {
+        Route::prefix('send-mails')->name('sendMail.')->group(function () {
+            Route::post('', 'store')->name('store');
         });
     });
 

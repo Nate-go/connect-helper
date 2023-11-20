@@ -3,6 +3,7 @@
 namespace App\Http\Requests\TagFormRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTagFormRequest extends FormRequest
 {
@@ -21,8 +22,17 @@ class StoreTagFormRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = auth()->user()->id; // Get the current user's ID
+
         return [
-            'name' => 'required|string|between:2,100|unique:tags'
+            'name' => [
+                'required',
+                'string',
+                'between:2,100',
+                Rule::unique('tags')->where(function ($query) use ($userId) {
+                    return $query->where('user_id', $userId);
+                }),
+            ],
         ];
     }
 }

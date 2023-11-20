@@ -70,4 +70,32 @@ class GmailTokenService extends BaseService
         $service = new Google_Service_Gmail($client);
         return $service;
     }
+
+    public function sendMail($type, $subject, $content, $user)
+    {
+        $service = $this->getGmailService($user);
+
+        $boundary = uniqid(rand(), true);
+
+        $rawMessage =
+            "From: " . $user->email . "\r\n" .
+            $type . "\r\n" .
+            "Subject: $subject\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n\r\n" .
+            "--$boundary\r\n" .
+            "Content-Type: text/html; charset=UTF-8\r\n" .
+            "Content-Transfer-Encoding: 7bit\r\n\r\n" .
+            $content . "\r\n" .
+            "--$boundary--";
+
+        $encodedMessage = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
+
+        try {
+            $service->users_messages->send('me', new \Google_Service_Gmail_Message(['raw' => $encodedMessage]));
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

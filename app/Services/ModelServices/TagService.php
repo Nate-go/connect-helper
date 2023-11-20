@@ -10,7 +10,18 @@ class TagService extends BaseService
     }
 
     public function getAllTags() {
-        return $this->model->where('user_id', auth()->user()->id)->get();
+        return $this->model->where('user_id', auth()->user()->id)->get()->map(function ($tag) {
+            return [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'connections' => $tag->connections->map(function ($connection) {
+                    return [
+                        'id' => $connection->id,
+                        'name' => $connection->name,
+                    ];
+                })
+            ];
+        });
     }
 
     public function create($data) {

@@ -82,7 +82,7 @@ class ConnectionService extends BaseService
 
         $service = $this->gmailTokenService->getGmailService($user);
 
-        $this->setConnectionUser($user, $user->name, $user->email);
+        $this->setConnectionUser($user, $user->name, $user->email, ConnectionStatus::PUBLIC);
 
         $messages = $service->users_messages->listUsersMessages('me', ['labelIds' => 'SENT']);
         $recipients = [];
@@ -95,7 +95,7 @@ class ConnectionService extends BaseService
                 if ($header->getName() === 'To') {
                     $data = $this->parseEmail($header->getValue());
                     if(! in_array($data['email'], $recipients)) {
-                        $recipients[$data['email']] = $data['name'];
+                        $recipients[strtolower($data['email'])] = $data['name'];
                     }
                     break;
                 }
@@ -109,11 +109,11 @@ class ConnectionService extends BaseService
         $this->setUpConnectionHistory($user, $service);
     }
 
-    private function setConnectionUser($user, $name, $email) {
+    private function setConnectionUser($user, $name, $email, $status=ConnectionStatus::PRIVATE) {
         $connection = $this->create([
             'name' => $name,
             'note' => $email,
-            'status' => ConnectionStatus::PRIVATE,
+            'status' => $status,
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id
 
@@ -260,7 +260,7 @@ class ConnectionService extends BaseService
 
         $connections = $this->model->whereIn('id', $connectionIds)->get();
         foreach($connections as $connection) {
-            $addIds = array_diff($userIds, $this->getIds($connection->users));
+            $addIds = array_diff($userIds, $this->getColumn($connection->users));
             foreach($addIds as $id) {
                 $this->createConnectionUser($id, $connection->id);
             }
@@ -276,13 +276,24 @@ class ConnectionService extends BaseService
 
         $connections = $this->model->whereIn('id', $connectionIds)->get();
         foreach ($connections as $connection) {
-            $deleteIds = array_intersect($userIds, $this->getIds($connection->users));
+            $deleteIds = array_intersect($userIds, $this->getColumn($connection->users));
             foreach ($deleteIds as $id) {
                 $this->deleteConnectionUser($id, $connection->id);
             }
         }
 
         return true;
+    }
+
+    public function getUserConnections() {
+        return auth()->user()->connections->map(function ($connection) {
+            return [
+                'id' => $connection->id,
+                'name' => $connection->name,
+                'note' => $connection->note,
+                'contacts' => $connection->mailContacts
+            ];
+        });
     }
 
     public function test() {

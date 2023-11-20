@@ -3,6 +3,8 @@
 namespace App\Services\ModelServices;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
+use App\Jobs\SendMailFromUser;
+use App\Jobs\SetupDataForUser;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\HtmlString;
 use App\Models\User;
@@ -48,35 +50,14 @@ class UserService extends BaseService {
         $link = str_replace("%FE_APP_URL%", env("FE_APP_URL") , $link);
         $link = str_replace("%INVITE_TOKEN%", $this->encryptToken($data), $link);
 
-        $service = $this->gmailTokenService->getGmailService($user);
-
-        $view = View::make('emails.send-mail-invite-template', ['enterpriseName' => $user->enterprise->name, 'link' => $link])->render();
-
-        $service = $this->gmailTokenService->getGmailService($user);
+        $content = View::make('emails.send-mail-invite-template', ['enterpriseName' => $user->enterprise->name, 'link' => $link])->render();
 
         $subject = "Invite to be an employee of " . $user->enterprise->name . " via ConnectionHelper";
 
-        $boundary = uniqid(rand(), true);
+        $type = "Bcc: " . implode(', ', $emails);
 
-        $rawMessage =
-            "From: " . $user->email . "\r\n" .
-            "To: " . implode(', ', $emails) . "\r\n" .
-            "Subject: $subject\r\n" .
-            "MIME-Version: 1.0\r\n" .
-            "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n\r\n" .
-            "--$boundary\r\n" .
-            "Content-Type: text/html; charset=UTF-8\r\n" .
-            "Content-Transfer-Encoding: 7bit\r\n\r\n" .
-            $view . "\r\n" .
-            "--$boundary--";
+        SendMailFromUser::dispatch($type, $subject, $content, $user);
 
-        $encodedMessage = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
-        
-        try {
-            $service->users_messages->send('me', new \Google_Service_Gmail_Message(['raw' => $encodedMessage]));
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        return true;
     }
 }
