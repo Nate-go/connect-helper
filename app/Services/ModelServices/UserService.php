@@ -29,13 +29,7 @@ class UserService extends BaseService {
     }
 
     public function getCoworkers($user) {
-        try {
-            $enterprise = $user->enterprise;
-
-            return $enterprise->users;
-        } catch (\Exception $e) {
-            return false;
-        }
+        return $user->coworkers;
     }
 
     public function invites($emails) {

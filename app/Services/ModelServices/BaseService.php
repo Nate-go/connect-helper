@@ -9,10 +9,8 @@ use Defuse\Crypto\Key;
 class BaseService {
     protected $model;
     
-    protected $formResponseService;
-
     public function create($data) {
-        if(!$data) return null;
+        if(!$data) return false;
         return $this->model->create($data);
     }
 

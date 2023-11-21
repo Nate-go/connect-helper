@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ConnectionHistoryController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\SendMailController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\TemplateController;
+use App\Http\Controllers\Api\TemplateGroupController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -108,6 +110,23 @@ Route::middleware('auth:api')->group(function() {
     Route::controller(SendMailController::class)->group(function () {
         Route::prefix('send-mails')->name('sendMail.')->group(function () {
             Route::post('', 'store')->name('store');
+        });
+    });
+
+    Route::controller(TemplateController::class)->group(function () {
+        Route::prefix('templates')->name('template.')->group(function () {
+            Route::post('', 'store')->name('store');
+            Route::get('/{id}', 'show')->name('show');
+            Route::delete('/{id}', 'delete')->name('delete');
+        });
+    });
+
+    Route::controller(TemplateGroupController::class)->group(function () {
+        Route::prefix('template-groups')->name('templateGroup.')->group(function () {
+            Route::post('', 'store')->name('store');
+            Route::get('/{id}', 'show')->name('show');
+            Route::delete('', 'delete')->name('delete');
+            Route::get('', 'index')->name('index');
         });
     });
 

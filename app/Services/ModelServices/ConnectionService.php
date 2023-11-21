@@ -41,12 +41,12 @@ class ConnectionService extends BaseService
     public function getConnections($input) {
         $tags = $input["tags"] ?? [];
         $statuses = $input["statuses"] ?? [];
+        $search = $input['search'] ?? '';
 
-        $query = $this->model->enterpriseConnection()->tagFilter($tags)->statusFilter($statuses);
+        $query = $this->model->enterpriseConnection()->where('name', 'LIKE', '%' . $search . '%')->tagFilter($tags)->statusFilter($statuses);
         $data = $this->getAll($input, $query);
         $data['items'] = ConnectionResource::collection($data['items']);
         return $data;
-
     }
 
     public function createConnectionUser($userId, $connectionId) {
