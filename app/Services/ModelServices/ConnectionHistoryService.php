@@ -2,6 +2,7 @@
 
 namespace App\Services\ModelServices;
 use App\Constants\ConnectionHistoryConstant\ConnectionHistoryType;
+use App\Jobs\UpdateHistory;
 use App\Models\Connection;
 use App\Models\ConnectionHistory;
 use Carbon\Carbon;
@@ -100,7 +101,7 @@ class ConnectionHistoryService extends BaseService
         foreach ($users as $user) {
             $service = $this->gmailTokenService->getGmailService($user);
             foreach ($mailContacts as $mailContact) {
-                $this->setUp($user, $mailContact, $service);
+                UpdateHistory::dispatch($user, $mailContact, $service);
             }
         }
 
