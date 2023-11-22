@@ -118,6 +118,8 @@ Route::middleware('auth:api')->group(function() {
             Route::post('', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
             Route::delete('/{id}', 'delete')->name('delete');
+            Route::put('/{id}', 'update')->name('update');
+            Route::get('', 'index')->name('index');
         });
     });
 
@@ -127,6 +129,7 @@ Route::middleware('auth:api')->group(function() {
             Route::get('/{id}', 'show')->name('show');
             Route::delete('', 'delete')->name('delete');
             Route::get('', 'index')->name('index');
+            Route::put('', 'update')->name('update');
         });
     });
 

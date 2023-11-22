@@ -50,6 +50,7 @@ class TemplateGroup extends Model
 
     public function publicTemplates():HasMany
     {
-        return $this->hasMany(Template::class)->where('status', TemplateStatus::PUBLIC );
+        if($this->user_id == auth()->user()->id) return $this->hasMany(Template::class);
+        return $this->hasMany(Template::class)->where('status', TemplateStatus::PUBLIC);
     }
 }

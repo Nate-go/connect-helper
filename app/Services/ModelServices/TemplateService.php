@@ -2,7 +2,9 @@
 
 namespace App\Services\ModelServices;
 use App\Constants\TemplateConstant\TemplateStatus;
+use App\Http\Resources\TemplatesReviewResource;
 use App\Models\Template;
+use App\Models\TemplateGroup;
 
 class TemplateService extends BaseService
 {
@@ -18,10 +20,7 @@ class TemplateService extends BaseService
         return $template;
     }
 
-    public function update($id, $input)
-    {
-        $result = $this->model->where('id', $id)->update($input);
-
-        return $result;
+    public function getUseableTemplate() {
+        return TemplatesReviewResource::collection(TemplateGroup::enterpriseTemplate()->get());
     }
 }

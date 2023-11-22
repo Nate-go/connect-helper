@@ -333,4 +333,12 @@ class ConnectionService extends BaseService
         }
     }
 
+    public function delete($ids) {
+        $ownConnectionIds = $this->getColumn(auth()->user()->ownConnections);
+
+        if(!$this->includesAll($ids, $ownConnectionIds)) return false;
+
+        return $this->model->destroy($ids);
+    }
+
 }

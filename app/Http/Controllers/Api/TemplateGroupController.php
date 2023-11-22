@@ -51,9 +51,9 @@ class TemplateGroupController extends Controller
         //
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        $result = $this->templateGroupService->update($id, $request->all());
+        $result = $this->templateGroupService->update($request->get('ids') ?? [], $request->get('data') ?? []);
         return response()->json([
             'message' => $result ? 'Update templateGroup successfull' : 'Update templateGroup fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
@@ -63,7 +63,7 @@ class TemplateGroupController extends Controller
     {
         $result = $this->templateGroupService->delete($request->get('ids') ?? []);
         return response()->json([
-            'message' => $result ? 'Delete templateGroup successfull' : 'Delete templateGroup fail',
+            'message' => $result ? 'Delete template group successfull' : 'Delete template group fail, You can not delete someone else\'s templates',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }

@@ -16,6 +16,10 @@ class TemplateController extends Controller
         $this->templateService = $templateService;
     }
 
+    public function index() {
+        return response()->json($this->templateService->getUseableTemplate(), StatusResponse::SUCCESS);
+    }
+
     public function store(StoreTemplateFormRequest $request)
     {
         $result = $this->templateService->create($request->all());
@@ -42,7 +46,7 @@ class TemplateController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $result = $this->templateService->update($id, $request->all());
+        $result = $this->templateService->update([$id], $request->all());
         return response()->json([
             'message' => $result ? 'Update template successfull' : 'Update template fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
@@ -50,7 +54,7 @@ class TemplateController extends Controller
 
     public function delete(string $id)
     {
-        $result = $this->templateService->delete($id);
+        $result = $this->templateService->delete([$id]);
         return response()->json([
             'message' => $result ? 'Delete template successfull' : 'Delete template fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);

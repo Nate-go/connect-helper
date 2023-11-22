@@ -78,4 +78,11 @@ class BaseService {
         }
         return $items;
     }
+
+    protected function includesAll($firstArray, $secondArray) {
+        foreach($firstArray as $item) {
+            if(!in_array($item, $secondArray)) return false;
+        }
+        return true;
+    }
 }

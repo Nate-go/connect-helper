@@ -22,7 +22,7 @@ class StoreTemplateFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|array',
+            'name' => 'required|string',
             'subject' => 'required|string',
             'content' => 'required|string',
             'type' => 'required',

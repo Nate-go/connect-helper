@@ -17,14 +17,7 @@ class TemplateGroupService extends BaseService
         if (!$template)
             return false;
 
-        return $template;
-    }
-
-    public function update($id, $input)
-    {
-        $result = $this->model->where('id', $id)->update($input);
-
-        return $result;
+        return $template->publicTemplates;
     }
 
     public function getTemplateGroups($input) {
@@ -38,6 +31,15 @@ class TemplateGroupService extends BaseService
     }
 
     public function delete($ids) {
+        $templateIds = $this->getColumn(auth()->user()->templateGroups, 'id');
+        if(!$this->includesAll($ids, $templateIds)) return false;
+
+        $templateGroups = $this->model->whereIn('id', $ids)->get();
+
+        foreach($templateGroups as $templateGroup) {
+            $templateGroup->template->delete();
+        }
+
         $result = $this->model->destroy($ids);
         return $result;
     }
