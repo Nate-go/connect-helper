@@ -85,4 +85,5 @@ class User extends Authenticatable implements JWTSubject
             ->where('id', '!=', $this->id)
             ->get();
     }
+
 }

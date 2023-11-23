@@ -132,5 +132,4 @@ Route::middleware('auth:api')->group(function() {
             Route::put('', 'update')->name('update');
         });
     });
-
 });
