@@ -54,7 +54,7 @@ class AuthenService
         $credentials = ['email'=> $input['email'],'password'=> $input['password']];
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(["message" => 'Unauthorized'], StatusResponse::UNAUTHORIZED);
+            return response()->json(["message" => 'User authentication failed'], StatusResponse::UNAUTHORIZED);
         }
 
         if ($remember) {

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('send_mail_contacts', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('send_mail_id')->nullable();
-            $table->bigInteger('to_contact_id')->nullable();
+            $table->bigInteger('contact_id')->nullable();
             $table->string('title')->nullable();
-            $table->string('content')->nullable();
+            $table->string('content', 1000)->nullable();
             $table->integer('type')->nullable();
             $table->timestamps();
             $table->softDeletes();  
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mail_contacts');
+        Schema::dropIfExists('send_mail_contacts');
     }
 };

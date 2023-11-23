@@ -60,12 +60,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function connections(): BelongsToMany
     {
-        return $this->belongsToMany(Connection::class, 'connection_users');
+        return $this->belongsToMany(Connection::class, 'connection_users')->whereNull('connection_users.deleted_at');
     }
 
     public function ownConnections(): HasMany 
     {
         return $this->hasMany(Connection::class);
     }
-
 }

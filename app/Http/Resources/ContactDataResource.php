@@ -17,6 +17,7 @@ class ContactDataResource extends JsonResource
                     'contacted_at' => $history->contacted_at,
                     'contact' => $history->contact,
                     'type' => $history->type,
+                    'link' => $history->link,
                     'user' => [
                             'id' => $history->user->id,
                             'name' => $history->user->name,

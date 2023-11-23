@@ -73,11 +73,11 @@ class BaseService {
         return json_decode($decryptedData, true);
     }
 
-    protected function getIds($data) {
-        $ids = [];
-        foreach( $data as $item ) {
-            $ids[] = $item->id;
+    protected function getColumn($data, $column='id') {
+        $items = [];
+        foreach ($data as $item) {
+            $items[] = $item->$column;
         }
-        return $ids;
+        return $items;
     }
 }
