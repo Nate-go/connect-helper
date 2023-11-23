@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Constants\TemplateConstant\TemplateStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -67,4 +68,22 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Connection::class);
     }
+
+    public function templateGroups(): HasMany
+    {
+        return $this->hasMany(TemplateGroup::class);
+    }
+
+    public function publicTemplateGroups(): HasMany
+    {
+        return $this->templateGroups->where('status', TemplateStatus::PUBLIC);
+    }
+
+    public function coworkers():HasMany
+    {
+        return User::where('enterprise_id', $this->enterprise_id)
+            ->where('id', '!=', $this->id)
+            ->get();
+    }
+
 }

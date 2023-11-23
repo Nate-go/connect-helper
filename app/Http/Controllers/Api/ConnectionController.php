@@ -65,7 +65,7 @@ class ConnectionController extends Controller
     {
         $result = $this->connectionService->delete($request->get('ids') ?? []);
         return response()->json([
-            'message' => $result ? 'Delete connection successfull' : 'Delete connection fail',
+            'message' => $result ? 'Delete connection successfull' : 'Delete connection fail, You can not delete someone else\'s connections',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 

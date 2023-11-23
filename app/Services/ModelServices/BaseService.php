@@ -9,10 +9,8 @@ use Defuse\Crypto\Key;
 class BaseService {
     protected $model;
     
-    protected $formResponseService;
-
     public function create($data) {
-        if(!$data) return null;
+        if(!$data) return false;
         return $this->model->create($data);
     }
 
@@ -79,5 +77,13 @@ class BaseService {
             $items[] = $item->$column;
         }
         return $items;
+    }
+
+    protected function includesAll($firstArray, $secondArray) {
+        foreach($firstArray as $item) {
+            if(!in_array($item, $secondArray)) return false;
+        }
+        return true;
+
     }
 }
