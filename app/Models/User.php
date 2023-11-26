@@ -98,4 +98,5 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Schedule::class, 'schedule_users')
             ->whereNull('schedule_users.deleted_at');
     }
+
 }
