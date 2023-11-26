@@ -56,6 +56,14 @@ class ConnectionService extends BaseService
         ]);
     }
 
+    public function update($ids, $data) {
+        if(isset($data['status'])) {
+            return $this->model->whereIn('id', $ids)->whereNot('status', ConnectionStatus::COWORKER)->update($data);
+        }
+
+        return parent::update($ids, $data);
+    } 
+
     public function deleteConnectionUser($userId, $connectionId)
     {
         ConnectionUser::where('user_id', $userId)->where('connection_id', $connectionId)->delete();
@@ -82,7 +90,7 @@ class ConnectionService extends BaseService
 
         $service = $this->gmailTokenService->getGmailService($user);
 
-        $this->setConnectionUser($user, $user->name, $user->email, ConnectionStatus::PUBLIC);
+        $this->setConnectionUser($user, $user->name, $user->email, ConnectionStatus::COWORKER);
 
         $messages = $service->users_messages->listUsersMessages('me', ['labelIds' => 'SENT']);
         $recipients = [];
@@ -133,6 +141,10 @@ class ConnectionService extends BaseService
         if(count($ids) < 2 or !$main) return false;
 
         $connections = $this->model->whereIn('id', $ids)->get();
+
+        foreach($connections as $connection) {
+            if($connection->status === ConnectionStatus::COWORKER or $connection->user_id !== auth()->user()->id) return false;
+        }
 
         foreach($connections as $connection) {
             if($main == $connection->id) continue;

@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
 use App\Services\ModelServices\GmailTokenService;
+use App\Services\ModelServices\TemplateGroupService;
 use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
@@ -34,13 +35,11 @@ class AuthenService
 
     protected $connectionService;
 
-    protected $tokenRespone = [];
-
     public function __construct(
             EnterpriseService $enterpriseService, 
             UserService $userService, 
             GmailTokenService $gmailTokenService,
-            ConnectionService $connectionService
+            ConnectionService $connectionService,
         ) {
         $this->enterpriseService = $enterpriseService;
         $this->userService = $userService;

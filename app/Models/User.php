@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\TemplateConstant\TemplateStatus;
+use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -61,7 +63,8 @@ class User extends Authenticatable implements JWTSubject
 
     public function connections(): BelongsToMany
     {
-        return $this->belongsToMany(Connection::class, 'connection_users')->whereNull('connection_users.deleted_at');
+        return $this->belongsToMany(Connection::class, 'connection_users')->whereNull('connection_users.deleted_at')
+                ->orWhere('connections.status', ConnectionStatus::COWORKER);
     }
 
     public function ownConnections(): HasMany 
@@ -81,8 +84,18 @@ class User extends Authenticatable implements JWTSubject
 
     public function coworkers():HasMany
     {
-        return User::where('enterprise_id', $this->enterprise_id)
-            ->where('id', '!=', $this->id)
-            ->get();
+        return $this->hasMany(User::class, 'enterprise_id', 'enterprise_id')
+            ->where('id', '!=', $this->id);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
+    public function hasSchedules()
+    {
+        return $this->belongsToMany(Schedule::class, 'schedule_users')
+            ->whereNull('schedule_users.deleted_at');
     }
 }
