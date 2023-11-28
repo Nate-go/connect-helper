@@ -63,4 +63,26 @@ class ScheduleController extends Controller
             'message' => $result ? 'Delete schedule successfull' : 'Delete schedule fail, You can not delete someone else\'s templates',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
+
+    public function addMembers(string $id, Request $request) {
+        $result = $this->scheduleService->addMembers($id, $request->get('userIds') ?? [], $request->get('contactIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Add member to schedule successfull' : 'Add member to schedule fail, You can not add member to someone else\'s schedules',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function deleteMembers(string $id, Request $request)
+    {
+        $result = $this->scheduleService->deleteMembers($id, $request->get('userIds') ?? [], $request->get('contactIds') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete member from schedule successfull' : 'Delete member from schedule fail, You can not add member to someone else\'s schedules',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function publish(string $id) {
+        $result = $this->scheduleService->publishSchedule($id);
+        return response()->json([
+            'message' => $result ? 'Publish schedule successfull' : 'Publish schedule fail, You can not add member to someone else\'s schedules',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
 }

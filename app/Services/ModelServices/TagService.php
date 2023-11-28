@@ -14,9 +14,9 @@ class TagService extends BaseService
         $tags = DefaultTagContent::DEFAULT_TAGS;
 
         foreach($tags as $tag) {
-            $this->create([
+            $this->model->create([
                 'user_id' => $user->id,
-                'content' => $tag
+                'name' => $tag
             ]);
         }
     }

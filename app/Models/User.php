@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Constants\ConnectionConstant\ConnectionStatus;
+use App\Constants\ScheduleConstant\ScheduleStatus;
 use App\Constants\TemplateConstant\TemplateStatus;
 use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -96,7 +97,7 @@ class User extends Authenticatable implements JWTSubject
     public function hasSchedules()
     {
         return $this->belongsToMany(Schedule::class, 'schedule_users')
-            ->whereNull('schedule_users.deleted_at');
+            ->whereNull('schedule_users.deleted_at')->where('status', ScheduleStatus::PUBLISH);
     }
 
 }

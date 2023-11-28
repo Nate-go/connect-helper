@@ -3,6 +3,7 @@
 namespace App\Services\ModelServices;
 use App\Constants\AuthenConstant\EncryptionKey;
 use App\Constants\UtilConstant;
+use Carbon\Carbon;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
 
@@ -84,6 +85,14 @@ class BaseService {
             if(!in_array($item, $secondArray)) return false;
         }
         return true;
+    }
 
+    public function customDate($dateString)
+    {
+        $dateString = str_replace(" ", "T", $dateString);
+        $date = Carbon::parse($dateString);
+        $date->addHours(7);
+
+        return str_replace(" ", "T", $date->toDateTimeString());
     }
 }

@@ -102,6 +102,6 @@ class AuthenController extends Controller
     }
 
     public function test(Request $request) {
-        $this->connectionService->test();
+        return $this->connectionService->test();
     }
 }

@@ -137,10 +137,13 @@ Route::middleware('auth:api')->group(function() {
     Route::controller(ScheduleController::class)->group(function () {
         Route::prefix('schedules')->name('schedule.')->group(function () {
             Route::post('', 'store')->name('store');
+            Route::post('/{id}/add-members', 'addMembers')->name('addMember');
             Route::get('/{id}', 'show')->name('show');
             Route::delete('', 'delete')->name('delete');
+            Route::delete('/{id}/delete-members', 'deleteMembers')->name('delete');
             Route::get('', 'index')->name('index');
             Route::put('', 'update')->name('update');
+            Route::put('/{id}/publish', 'publish')->name('publish');
         });
     });
 

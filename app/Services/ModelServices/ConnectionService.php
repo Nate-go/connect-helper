@@ -10,7 +10,15 @@ use App\Http\Resources\ShowConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionTag;
 use App\Models\ConnectionUser;
+use App\Models\Schedule;
 use App\Models\User;
+use Google\Service\Calendar\ConferenceData as Google_Service_Calendar_ConferenceData;
+use Google\Service\Calendar\CreateConferenceRequest as Google_Service_Calendar_CreateConferenceRequest;
+use Google\Service\Calendar\ConferenceSolutionKey as Google_Service_Calendar_ConferenceSolutionKey;
+use Google_Service_Calendar_Event;
+use Google_Service_Calendar_EventReminder;
+use Google\Service\Calendar\EventReminders as Google_Service_Calendar_EventReminders;
+use Google_Service_Exception;
 use Request;
 
 
@@ -310,38 +318,73 @@ class ConnectionService extends BaseService
 
     public function test() {
         $user = User::where('id', 1)->first();
-        $service = $this->gmailTokenService->getGmailService($user);
+        $service = $this->gmailTokenService->getCalendarService($user);
+        $schedule = Schedule::where('id', 1)->first();
+        $emails = ["xayvier01@gmail.com"];
+        $newEmail = [];
+        foreach ($emails as $email) {
+            $newEmail[] = [
+                'email' => $email
+            ];
+        }
+        $conference = new Google_Service_Calendar_ConferenceData();
+        $conferenceRequest = new Google_Service_Calendar_CreateConferenceRequest();
+        $conferenceSolutionKey = new Google_Service_Calendar_ConferenceSolutionKey();
+        $conferenceSolutionKey->setType("hangoutsMeet");
+        $conferenceRequest->setRequestId($user->email . time());
+        $conferenceRequest->setConferenceSolutionKey($conferenceSolutionKey);
+        $conference->setCreateRequest($conferenceRequest);
 
-        $query = "trainergoldenowl.asia&isrefinement=true";
+        $reminder = new Google_Service_Calendar_EventReminder();
+        $reminder->setMethod('email');
+        $reminder->setMinutes(30);
+
+        $reminders = new Google_Service_Calendar_EventReminders();
+        $reminders->setUseDefault(false);
+        $reminders->setOverrides([$reminder]);
+
+        return json_encode([
+            'summary' => $schedule->title,
+            'description' => $schedule->content,
+            'start' => [
+                'dateTime' => $this->customDate($schedule->started_at),
+                'timeZone' => 'Asia/Ho_Chi_Minh',
+            ],
+            'end' => [
+                'dateTime' => $this->customDate($schedule->finished_at),
+                'timeZone' => 'Asia/Ho_Chi_Minh',
+            ],
+            'attendees' => $newEmail,
+            'conferenceData' => $conference
+        ]);
+
+        $event = new Google_Service_Calendar_Event([
+            'summary' => $schedule->title,
+            'description' => $schedule->content,
+            'start' => [
+                'dateTime' => $this->customDate($schedule->started_at),
+                'timeZone' => 'Asia/Ho_Chi_Minh',
+            ],
+            'end' => [
+                'dateTime' => $this->customDate($schedule->finished_at),
+                'timeZone' => 'Asia/Ho_Chi_Minh',
+            ],
+            'attendees' => $newEmail,
+            'conferenceData' => $conference
+        ]);
+
+
+
+        $event->setReminders($reminders);
+
+        $calendarId = 'primary';
+
         try {
-            $messages = $service->users_messages->listUsersMessages('me', ['q' => $query])->getMessages();
-            dd(count($messages));
-            foreach ($messages as $message) {
-                $messageDetail = $service->users_messages->get('me', $message->getId());
-                // dump($messageDetail);
-                $headers = $messageDetail->getPayload()->getHeaders();
-                $sentTime = null;
-                foreach ($headers as $header) {
-                    // if ($header->name == 'Date') {
-                    //     $sentTime = Carbon::parse($header->value)->toDateTime()->format('Y-m-d H:i:s');
-                    //     break;
-                    // }
-                    if ($header->name == 'From') {
-                        dump($header->value);
-                        break;
-                    }
-                }
-
-                // $this->model->create([
-                //     'user_id' => $user->id,
-                //     'contact_id' => $contact->id,
-                //     'contacted_at' => $sentTime,
-                //     'type' => ConnectionHistoryType::SEND
-                // ]);
-            }
-            dd($messages);
-
-        } catch (\Exception $e) {
+            $createEvent = $service->events->insert($calendarId, $event, array('conferenceDataVersion' => 1));
+            $meetingLink = $createEvent->getHangoutLink();
+            return $meetingLink;
+        } catch (Google_Service_Exception $e) {
+            return $e->getMessage();
         }
     }
 
