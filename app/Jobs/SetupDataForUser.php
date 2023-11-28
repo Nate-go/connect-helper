@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\Template;
 use App\Services\ModelServices\ConnectionService;
+use App\Services\ModelServices\TagService;
+use App\Services\ModelServices\TemplateGroupService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,8 +25,10 @@ class SetupDataForUser implements ShouldQueue
         $this->user = $user;
     }
 
-    public function handle(ConnectionService $connectionService): void
+    public function handle(ConnectionService $connectionService, TemplateGroupService $templateGroupService, TagService $tagService): void
     {
+        $tagService->setUp($this->user);
         $connectionService->setUp($this->user);
+        $templateGroupService->setUp($this->user);
     }
 }

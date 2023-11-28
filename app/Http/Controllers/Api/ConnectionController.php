@@ -72,7 +72,7 @@ class ConnectionController extends Controller
     public function merge(Request $request) {
         $result = $this->connectionService->merge($request->get('ids') ?? [], $request->get('main') ?? null);
         return response()->json([
-            'message'=> $result ? 'Merge connection successfull' : 'Merge connection fail',
+            'message'=> $result ? 'Merge connection successfull' : 'Merge connection fail, you can not merge coworker or someone else\'s connections',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 

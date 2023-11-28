@@ -4,6 +4,7 @@ namespace App\Services\ModelServices;
 use App\Models\GmailToken;
 use App\Models\User;
 use Google_Client;
+use Google\Service\Calendar as Google_Service_Calendar;
 use Google_Service_Gmail;
 use Http;
 
@@ -68,6 +69,14 @@ class GmailTokenService extends BaseService
         $client = new Google_Client();
         $client->setAccessToken($this->getAccessToken($user));
         $service = new Google_Service_Gmail($client);
+        return $service;
+    }
+
+    public function getCalendarService($user)
+    {
+        $client = new Google_Client();
+        $client->setAccessToken($this->getAccessToken($user));
+        $service = new Google_Service_Calendar($client);
         return $service;
     }
 

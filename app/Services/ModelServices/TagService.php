@@ -1,12 +1,24 @@
 <?php
 
 namespace App\Services\ModelServices;
+use App\Constants\TagConstant\DefaultTagContent;
 use App\Models\Tag;
 
 class TagService extends BaseService
 {
     public function __construct(Tag $tag) {
         $this->model = $tag;
+    }
+
+    public function setUp($user) {
+        $tags = DefaultTagContent::DEFAULT_TAGS;
+
+        foreach($tags as $tag) {
+            $this->model->create([
+                'user_id' => $user->id,
+                'name' => $tag
+            ]);
+        }
     }
 
     public function getAllTags() {

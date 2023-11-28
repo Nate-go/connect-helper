@@ -40,7 +40,7 @@ class TemplateGroupController extends Controller
         $result = $this->templateGroupService->show($id);
         if (!$result) {
             return response()->json([
-                'message' => 'Can not find out this templateGroup',
+                'message' => 'Can not find out this template group',
             ], StatusResponse::ERROR);
         }
         return response()->json($result, StatusResponse::SUCCESS);
@@ -55,7 +55,7 @@ class TemplateGroupController extends Controller
     {
         $result = $this->templateGroupService->update($request->get('ids') ?? [], $request->get('data') ?? []);
         return response()->json([
-            'message' => $result ? 'Update templateGroup successfull' : 'Update templateGroup fail',
+            'message' => $result ? 'Update template group successfull' : 'Update template group fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 

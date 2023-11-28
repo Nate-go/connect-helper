@@ -1,13 +1,22 @@
 <?php
 
 namespace App\Services\ModelServices;
+use App\Constants\SendMailConstant\SendMailType;
+use App\Constants\TemplateConstant\DefaultTemplate;
+use App\Constants\TemplateConstant\TemplateStatus;
+use App\Constants\UserConstant\UserRole;
+
 use App\Http\Resources\TemplateGroupResource;
 use App\Models\TemplateGroup;
 
 class TemplateGroupService extends BaseService
 {
-    public function __construct(TemplateGroup $templateGroup) {
+    protected $templateService;
+
+    public function __construct(TemplateGroup $templateGroup, TemplateService $templateService) {
         $this->model = $templateGroup;
+        $this->templateService = $templateService;
+
     }
 
     public function show($id)
@@ -34,13 +43,34 @@ class TemplateGroupService extends BaseService
         $templateIds = $this->getColumn(auth()->user()->templateGroups, 'id');
         if(!$this->includesAll($ids, $templateIds)) return false;
 
-        $templateGroups = $this->model->whereIn('id', $ids)->get();
-
-        foreach($templateGroups as $templateGroup) {
-            $templateGroup->template->delete();
-        }
-
         $result = $this->model->destroy($ids);
         return $result;
+    }
+
+    public function setUp($user) {
+        if($user->role !== UserRole::OWNER) return;
+
+        $templateGroups = DefaultTemplate::TEMPLATE_GROUPS;
+
+        foreach($templateGroups as $templateGroup) {
+            $newTemplateGroup = $this->create([
+                'user_id' => $user->id,
+                'enterprise_id' => $user->enterprise_id,
+                'name' => $templateGroup["name"],
+                'status' => TemplateStatus::PUBLIC
+            ]);
+
+            foreach($templateGroup["templates"] as $template) {
+                $this->templateService->create([
+                    'template_group_id' => $newTemplateGroup->id,
+                    'name' => $template["name"],
+                    'subject' => $template["subject"],
+                    'content' => $template["content"],
+                    'type' => SendMailType::PERSONAL,
+                    'status' => TemplateStatus::PUBLIC
+                ]);
+            }
+        }
+
     }
 }

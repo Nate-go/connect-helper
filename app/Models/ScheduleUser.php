@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ScheduleContact extends Model
+class ScheduleUser extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'schedule_id',
-        'contact_id'
+        'user_id'
     ];
 }
