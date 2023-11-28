@@ -31,7 +31,7 @@ class TemplateGroupController extends Controller
             'enterprise_id' => auth()->user()->enterprise_id
         ]));
         return response()->json([
-            'message' => $result ? 'Create template group successfull' : 'Create template group fail',
+            'message' => $result ? 'Create templateGroup successfull' : 'Create templateGroup fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 

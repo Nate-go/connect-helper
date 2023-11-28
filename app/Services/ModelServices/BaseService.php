@@ -94,5 +94,6 @@ class BaseService {
         $date->addHours(7);
 
         return str_replace(" ", "T", $date->toDateTimeString());
+
     }
 }

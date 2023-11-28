@@ -146,5 +146,4 @@ Route::middleware('auth:api')->group(function() {
             Route::put('/{id}/publish', 'publish')->name('publish');
         });
     });
-
 });

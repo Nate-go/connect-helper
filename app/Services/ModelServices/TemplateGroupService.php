@@ -5,6 +5,7 @@ use App\Constants\SendMailConstant\SendMailType;
 use App\Constants\TemplateConstant\DefaultTemplate;
 use App\Constants\TemplateConstant\TemplateStatus;
 use App\Constants\UserConstant\UserRole;
+
 use App\Http\Resources\TemplateGroupResource;
 use App\Models\TemplateGroup;
 
@@ -15,6 +16,7 @@ class TemplateGroupService extends BaseService
     public function __construct(TemplateGroup $templateGroup, TemplateService $templateService) {
         $this->model = $templateGroup;
         $this->templateService = $templateService;
+
     }
 
     public function show($id)
@@ -69,5 +71,6 @@ class TemplateGroupService extends BaseService
                 ]);
             }
         }
+
     }
 }
