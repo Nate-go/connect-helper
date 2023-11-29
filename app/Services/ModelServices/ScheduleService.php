@@ -167,6 +167,7 @@ class ScheduleService extends BaseService
 
         $event = new Google_Service_Calendar_Event([
             'summary' => $schedule->title,
+            'lo',
             'description' => $schedule->content,
             'start' => [
                 'dateTime' => $this->customDate($schedule->started_at),
@@ -177,6 +178,7 @@ class ScheduleService extends BaseService
                 'timeZone' => 'Asia/Ho_Chi_Minh',
             ],
             'attendees' => $newEmail,
+            'location' => $schedule->type == ScheduleType::ONLINE ? "Follow the meeting link to join" : $schedule->place, 
         ]);
 
         $event->setReminders($reminders);

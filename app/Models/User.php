@@ -29,7 +29,10 @@ class User extends Authenticatable implements JWTSubject
         'role',
         'status',
         'enterprise_id',
-        'image_url'
+        'image_url',
+        'phonenumber',
+        'gender',
+        'date_of_birth'
     ];
 
     protected $hidden = [
@@ -98,6 +101,10 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Schedule::class, 'schedule_users')
             ->whereNull('schedule_users.deleted_at')->where('status', ScheduleStatus::PUBLISH);
+    }
+
+    public function scopeUserCoworkers($query, $user) {
+        $query->where('enterprise_id', $user->enterprise_id)->whereNot('id', $user->id);
     }
 
 }

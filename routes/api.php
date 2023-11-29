@@ -42,11 +42,17 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::middleware('auth:api')->group(function() {
-    Route::middleware('author:' . UserRole::ADMIN)->group(function () {
-        Route::controller(UserController::class)->prefix('users')->group(function () {
-            Route::get('/', [UserController::class,'index'])->name('getAllUser');
+    // Route::middleware('author:' . UserRole::ADMIN)->group(function () {
+    //     Route::controller(UserController::class)->prefix('users')->group(function () {
+    //         Route::get('/', [UserController::class,'index'])->name('getAllUser');
             
-        });
+    //     });
+    // });
+
+    Route::controller(UserController::class)->prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('getAllUser');
+        Route::get('/dashboard', [UserController::class, 'getDashboard'])->name('getDashboard');
+
     });
     
     Route::controller(AuthenController::class)->group(function () {

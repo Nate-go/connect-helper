@@ -1,8 +1,10 @@
 <?php 
 
 namespace App\Services\ModelServices;
+use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
+use App\Http\Resources\EmployeesResource;
 use App\Jobs\SendMailFromUser;
 use App\Jobs\SetupDataForUser;
 use Illuminate\Support\Facades\View;
@@ -17,6 +19,15 @@ class UserService extends BaseService {
     {
         $this->model = $user;
         $this->gmailTokenService = $gmailTokenService;
+    }
+
+    public function getEnterpriseEmployee($user, $input) {
+        $search = $input['search'] ?? '';
+
+        $query = $this->model->userCoworkers($user)->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+        $data = $this->getAll($input, $query);
+        $data['items'] = EmployeesResource::collection($data['items']);
+        return $data;
     }
 
     public function getAllOwner() {
@@ -53,5 +64,31 @@ class UserService extends BaseService {
         SendMailFromUser::dispatch($type, $subject, $content, $user);
 
         return true;
+    }
+
+    public function getDashboard($user, $year) {
+        return $this->getConnectionsByMonth($user, $year);
+    }
+
+    public function getConnectionsByMonth($user, $year)
+    {
+        $connections = $user->connections()
+            ->whereYear('created_at', $year)->get();
+
+        $data = [
+            ConnectionStatus::PUBLIC => [],
+            ConnectionStatus::PRIVATE => []
+        ];
+        foreach($connections as $connection) {
+            $month = Carbon::parse($connection->created_at)->month;
+            $status = $connection->status == ConnectionStatus::COWORKER ? ConnectionStatus::PUBLIC : $connection->status;
+            if(isset($data[$connection->status][$month - 1])) {
+                $data[$status][$month - 1] += 1;
+            } else {
+                $data[$status][$month - 1] = 0;
+            }
+        }
+
+        return $data;
     }
 }

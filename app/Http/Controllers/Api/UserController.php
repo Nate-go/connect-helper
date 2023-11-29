@@ -19,9 +19,9 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->userService->getAllOwner();
+        return response()->json(["data" => $this->userService->getEnterpriseEmployee(auth()->user(), $request->all())], StatusResponse::SUCCESS);
     }
 
     /**
@@ -51,9 +51,12 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $result = $this->userService->delete($request->get('ids') ?? []);
+        return response()->json([
+            'message' => $result ? 'Delete user successfull' : 'Delete user fail',
+        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     public function getCoworkers() 
