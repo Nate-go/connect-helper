@@ -29,6 +29,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('reminder_contacts', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['contact_id']);
+
+        });
         Schema::dropIfExists('reminder_contacts');
     }
 };

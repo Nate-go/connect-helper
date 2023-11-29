@@ -28,6 +28,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('connection_histories', function (Blueprint $table) {
+            $table->dropForeign(['connection_user_id']);
+        });
         Schema::dropIfExists('connection_histories');
     }
 };

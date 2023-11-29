@@ -31,6 +31,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('servey_element_votes');
+        Schema::table('survey_element_votes', function (Blueprint $table) {
+            $table->dropForeign(['survey_id']);
+            $table->dropForeign(['survey_element_id']);
+            $table->dropForeign(['contact_id']);
+        });
+        Schema::dropIfExists('survey_element_votes');
     }
 };
