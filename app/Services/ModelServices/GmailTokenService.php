@@ -83,7 +83,6 @@ class GmailTokenService extends BaseService
     public function sendMail($type, $subject, $content, $user)
     {
         $service = $this->getGmailService($user);
-        return false;
         $boundary = uniqid(rand(), true);
 
         $rawMessage =
