@@ -67,7 +67,12 @@ class UserController extends Controller
     public function invites(InvitesFormRequest $request) {
         $result = $this->userService->invites($request->get('emails'));
         return response()->json([
-            'message' => $result ? 'Send invite mail successfully' : 'Send invite mail fail'
+            'message' => $result ? 'Send invite mail successfully' : 'Send invite mail fail',
+            'data' => $result
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
+    }
+
+    public function getDashboard() {
+        return response()->json($this->userService->getDashboard(auth()->user()), StatusResponse::SUCCESS);
     }
 }

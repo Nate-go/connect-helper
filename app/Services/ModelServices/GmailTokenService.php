@@ -104,7 +104,7 @@ class GmailTokenService extends BaseService
             $service->users_messages->send('me', new \Google_Service_Gmail_Message(['raw' => $encodedMessage]));
             return true;
         } catch (\Exception $e) {
-            return false;
+            return $e->getMessage();
         }
     }
 }
