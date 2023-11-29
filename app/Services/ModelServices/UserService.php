@@ -61,9 +61,7 @@ class UserService extends BaseService {
 
         $type = "Bcc: " . implode(', ', $emails);
 
-        return $this->gmailTokenService->sendMail($type, $subject, $content, $user);
-
-        //SendMailFromUser::dispatch($type, $subject, $content, $user);
+        SendMailFromUser::dispatch($type, $subject, $content, $user);
 
         return true;
     }
