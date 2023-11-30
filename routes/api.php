@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
 use App\Http\Controllers\Api\ConnectionHistoryController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\EnterpriseController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\SendMailController;
 use App\Http\Controllers\Api\TagController;
@@ -50,9 +51,12 @@ Route::middleware('auth:api')->group(function() {
     // });
 
     Route::controller(UserController::class)->prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('getAllUser');
-        Route::get('/dashboard', [UserController::class, 'getDashboard'])->name('getDashboard');
+        Route::get('/', 'index')->name('getAllUser');
+        Route::get('/dashboard', 'getDashboard')->name('getDashboard');
+    });
 
+    Route::controller(EnterpriseController::class)->prefix('enterprises')->group(function () {
+        Route::get('/', 'index')->name('getAllEnterprise');
     });
     
     Route::controller(AuthenController::class)->group(function () {

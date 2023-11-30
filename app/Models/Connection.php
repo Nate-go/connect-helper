@@ -76,10 +76,12 @@ class Connection extends Model
 
     public function scopeEnterpriseConnection($query) {
         $query->where('user_id', auth()->user()->id)
-            ->orWhere('status', ConnectionStatus::COWORKER)
             ->orWhere(function ($query) {
                 $query->where('enterprise_id', auth()->user()->enterprise_id)
-                    ->where('status', ConnectionStatus::PUBLIC);
+                    ->where(function ($query) {
+                        $query->where('status', ConnectionStatus::PUBLIC)
+                            ->orWhere('status', ConnectionStatus::COWORKER);
+                    });
             });
     }
 
