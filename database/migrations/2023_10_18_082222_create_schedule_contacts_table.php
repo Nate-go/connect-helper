@@ -30,7 +30,7 @@ return new class extends Migration
     {
         Schema::table('schedule_contacts', function (Blueprint $table) {
             $table->dropForeign(['schedule_id']);
-            $table->dropForeign(['contact_id']);        
+            $table->dropForeign(['contact_id']);
         });
         Schema::dropIfExists('schedule_contacts');
     }

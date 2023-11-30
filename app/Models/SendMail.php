@@ -17,7 +17,7 @@ class SendMail extends Model
         'title',
         'content',
         'name',
-        'type'
+        'type',
     ];
 
     public function contacts(): BelongsToMany

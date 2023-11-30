@@ -12,11 +12,11 @@ class GmailToken extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        "user_id",
-        "access_token",
-        "expired_at",
-        "refresh_token"
-    ] ;
+        'user_id',
+        'access_token',
+        'expired_at',
+        'refresh_token',
+    ];
 
     public function user(): BelongsTo
     {

@@ -23,7 +23,7 @@ class StoreConnectionFormRequest extends FormRequest
     {
         return [
             'tagIds' => 'required|array',
-            'data' => 'required'
+            'data' => 'required',
         ];
     }
 }

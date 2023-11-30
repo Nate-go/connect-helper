@@ -17,6 +17,7 @@ class UserInformation extends JsonResource
         $user = auth()->user()->toArray();
         $user['enterprise'] = $this->enterprise->toArray();
         unset($user['enterprise_id']);
+
         return $user;
     }
 }

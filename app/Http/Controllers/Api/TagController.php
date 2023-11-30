@@ -12,7 +12,8 @@ class TagController extends Controller
 {
     protected $tagService;
 
-    public function __construct(TagService $tagService) {
+    public function __construct(TagService $tagService)
+    {
         $this->tagService = $tagService;
     }
 
@@ -23,14 +24,15 @@ class TagController extends Controller
 
     public function create()
     {
-        
+
     }
 
     public function store(StoreTagFormRequest $request)
     {
         $this->tagService->create($request->all());
+
         return response()->json([
-            "message" => "Create tag successfully"
+            'message' => 'Create tag successfully',
         ], StatusResponse::SUCCESS);
     }
 
@@ -42,9 +44,9 @@ class TagController extends Controller
     public function edit(string $id)
     {
         $result = $this->tagService->detail($id);
-        if (!$result) {
+        if (! $result) {
             return response()->json([
-                'message' => 'Can not find out this tag'
+                'message' => 'Can not find out this tag',
             ], StatusResponse::ERROR);
         }
 
@@ -53,17 +55,19 @@ class TagController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $result =  $this->tagService->update([$id], $request->all());
+        $result = $this->tagService->update([$id], $request->all());
+
         return response()->json([
-            'message' => $result ? 'Update tags successfully' : 'Update tags fail'
+            'message' => $result ? 'Update tags successfully' : 'Update tags fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
     public function destroy(Request $request)
     {
-        $result=  $this->tagService->delete($request->get('ids') ?? []);
+        $result = $this->tagService->delete($request->get('ids') ?? []);
+
         return response()->json([
-            'message' => $result ? 'Delete tags successfully' : 'Delete tags fail'
+            'message' => $result ? 'Delete tags successfully' : 'Delete tags fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 }

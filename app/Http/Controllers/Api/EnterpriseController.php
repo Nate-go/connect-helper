@@ -11,14 +11,17 @@ class EnterpriseController extends Controller
 {
     protected $enterpriseService;
 
-    public function __construct(EnterpriseService $enterpriseService) {
+    public function __construct(EnterpriseService $enterpriseService)
+    {
         $this->enterpriseService = $enterpriseService;
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $data = $this->enterpriseService->get($request->all());
+
         return response()->json([
-            'data' => $data
+            'data' => $data,
         ], StatusResponse::SUCCESS);
     }
 }

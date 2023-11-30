@@ -22,8 +22,8 @@ class VerifyAccountFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => "required|email",
-            "verify_code" => "required|string",
+            'email' => 'required|email',
+            'verify_code' => 'required|string',
         ];
     }
 }

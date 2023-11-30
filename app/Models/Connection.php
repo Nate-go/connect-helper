@@ -17,14 +17,14 @@ class Connection extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 
+        'name',
         'note',
         'status',
         'user_id',
-        'enterprise_id'
+        'enterprise_id',
     ];
 
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -39,7 +39,7 @@ class Connection extends Model
         return $this->hasMany(Contact::class);
     }
 
-    public function mailContacts() : HasMany
+    public function mailContacts(): HasMany
     {
         return $this->contacts()->where('type', ContactType::MAIL);
     }
@@ -74,7 +74,8 @@ class Connection extends Model
         $query->whereIn('status', $values);
     }
 
-    public function scopeEnterpriseConnection($query) {
+    public function scopeEnterpriseConnection($query)
+    {
         $query->where('user_id', auth()->user()->id)
             ->orWhere(function ($query) {
                 $query->where('enterprise_id', auth()->user()->enterprise_id)
@@ -84,5 +85,4 @@ class Connection extends Model
                     });
             });
     }
-
 }

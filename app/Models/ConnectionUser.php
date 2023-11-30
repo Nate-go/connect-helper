@@ -12,6 +12,6 @@ class ConnectionUser extends Model
 
     protected $fillable = [
         'user_id',
-        'connection_id'
+        'connection_id',
     ];
 }

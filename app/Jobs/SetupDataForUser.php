@@ -2,12 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Models\Template;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\TagService;
 use App\Services\ModelServices\TemplateGroupService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -18,7 +16,6 @@ class SetupDataForUser implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $user;
-
 
     public function __construct($user)
     {

@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreContactFormRequest extends FormRequest
 {
-
     public function authorize(): bool
     {
         return true;
@@ -23,7 +22,7 @@ class StoreContactFormRequest extends FormRequest
             'connection_id' => 'required',
             'type' => 'required',
             'content' => 'required',
-            'title' => 'required'
+            'title' => 'required',
         ];
     }
 }

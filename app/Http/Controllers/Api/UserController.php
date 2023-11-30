@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UltiFormRequests\InvitesFormRequest;
-use App\Models\User;
 use App\Services\ModelServices\UserService;
 use Illuminate\Http\Request;
 
@@ -13,15 +12,17 @@ class UserController extends Controller
 {
     protected $userService;
 
-    public function __construct(UserService $userService) {
+    public function __construct(UserService $userService)
+    {
         $this->userService = $userService;
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        return response()->json(["data" => $this->userService->getEnterpriseEmployee(auth()->user(), $request->all())], StatusResponse::SUCCESS);
+        return response()->json(['data' => $this->userService->getEnterpriseEmployee(auth()->user(), $request->all())], StatusResponse::SUCCESS);
     }
 
     /**
@@ -54,25 +55,29 @@ class UserController extends Controller
     public function destroy(Request $request)
     {
         $result = $this->userService->delete($request->get('ids') ?? []);
+
         return response()->json([
             'message' => $result ? 'Delete user successfull' : 'Delete user fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    public function getCoworkers() 
+    public function getCoworkers()
     {
         return response()->json($this->userService->getCoworkers(auth()->user()), StatusResponse::SUCCESS);
     }
 
-    public function invites(InvitesFormRequest $request) {
+    public function invites(InvitesFormRequest $request)
+    {
         $result = $this->userService->invites($request->get('emails'));
+
         return response()->json([
             'message' => $result ? 'Send invite mail successfully' : 'Send invite mail fail',
-            'data' => $result
+            'data' => $result,
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    public function getDashboard() {
+    public function getDashboard()
+    {
         return response()->json($this->userService->getDashboard(auth()->user()), StatusResponse::SUCCESS);
     }
 }

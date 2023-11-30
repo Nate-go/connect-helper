@@ -32,6 +32,6 @@ return new class extends Migration
             $table->dropForeign(['survey_id']);
         });
         Schema::dropIfExists('survey_elements');
-        
+
     }
 };

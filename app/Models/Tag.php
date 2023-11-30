@@ -15,7 +15,7 @@ class Tag extends Model
 
     protected $fillable = [
         'user_id',
-        'name'
+        'name',
     ];
 
     public function user(): BelongsTo
@@ -28,12 +28,12 @@ class Tag extends Model
         return $this->belongsToMany(Connection::class, 'connection_tags')->whereNull('connection_tags.deleted_at');
     }
 
-    public function connectionTags() : HasMany
+    public function connectionTags(): HasMany
     {
         return $this->hasMany(ConnectionTag::class);
     }
 
-    public function deleteConnectionTags() 
+    public function deleteConnectionTags()
     {
         $this->connectionTags()->delete();
     }

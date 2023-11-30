@@ -1,53 +1,66 @@
 <?php
 
 namespace App\Services\ModelServices;
+
 use App\Constants\AuthenConstant\EncryptionKey;
 use App\Constants\UtilConstant;
 use Carbon\Carbon;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
 
-class BaseService {
+class BaseService
+{
     protected $model;
-    
-    public function create($data) {
-        if(!$data) return false;
+
+    public function create($data)
+    {
+        if (! $data) {
+            return false;
+        }
+
         return $this->model->create($data);
     }
 
-    public function update($ids, $data) {
+    public function update($ids, $data)
+    {
         try {
             $this->model->whereIn('id', $ids)->update($data);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
+
         return true;
     }
 
-    public function delete($ids) {
+    public function delete($ids)
+    {
         return $this->model->destroy($ids);
     }
 
-    public function getFirst($id) {
+    public function getFirst($id)
+    {
         return $this->model->where('id', $id)->first();
     }
 
-    public function getAll($input, $query = null) {
-        if(!$query) $query = $this->model->query();
-        $limit =  $input["limit"] ?? UtilConstant::LIMIT_RECORD;
-        $column = $input["column"] ?? UtilConstant::COLUMN_DEFAULT;
-        $order = $input["order"] ?? UtilConstant::ORDER_TYPE;
+    public function getAll($input, $query = null)
+    {
+        if (! $query) {
+            $query = $this->model->query();
+        }
+        $limit = $input['limit'] ?? UtilConstant::LIMIT_RECORD;
+        $column = $input['column'] ?? UtilConstant::COLUMN_DEFAULT;
+        $order = $input['order'] ?? UtilConstant::ORDER_TYPE;
 
         $data = $query->orderBy($column, $order)->paginate($limit);
 
         return [
             'items' => $data->items(),
-            'pagination' => $this->getPaginationData($data)
+            'pagination' => $this->getPaginationData($data),
         ];
     }
 
-    public function getPaginationData($data) {
+    public function getPaginationData($data)
+    {
         $pagination = [
             'perPage' => $data->perPage(),
             'currentPage' => $data->currentPage(),
@@ -62,6 +75,7 @@ class BaseService {
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $encryptedData = Crypto::encrypt(json_encode($data), $key);
+
         return $encryptedData;
     }
 
@@ -69,31 +83,38 @@ class BaseService {
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $decryptedData = Crypto::decrypt($encryptedData, $key);
+
         return json_decode($decryptedData, true);
     }
 
-    protected function getColumn($data, $column='id') {
+    protected function getColumn($data, $column = 'id')
+    {
         $items = [];
         foreach ($data as $item) {
             $items[] = $item->$column;
         }
+
         return $items;
     }
 
-    protected function includesAll($firstArray, $secondArray) {
-        foreach($firstArray as $item) {
-            if(!in_array($item, $secondArray)) return false;
+    protected function includesAll($firstArray, $secondArray)
+    {
+        foreach ($firstArray as $item) {
+            if (! in_array($item, $secondArray)) {
+                return false;
+            }
         }
+
         return true;
     }
 
     public function customDate($dateString)
     {
-        $dateString = str_replace(" ", "T", $dateString);
+        $dateString = str_replace(' ', 'T', $dateString);
         $date = Carbon::parse($dateString);
         $date->addHours(7);
 
-        return str_replace(" ", "T", $date->toDateTimeString());
+        return str_replace(' ', 'T', $date->toDateTimeString());
 
     }
 }

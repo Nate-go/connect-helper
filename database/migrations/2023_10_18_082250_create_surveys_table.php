@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id')->nullable(); 
+            $table->bigInteger('user_id')->nullable();
             $table->string('title')->nullable();
             $table->string('content')->nullable();
             $table->timestamps();

@@ -6,7 +6,6 @@ namespace App\Models;
 use App\Constants\ConnectionConstant\ConnectionStatus;
 use App\Constants\ScheduleConstant\ScheduleStatus;
 use App\Constants\TemplateConstant\TemplateStatus;
-use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -32,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
         'image_url',
         'phonenumber',
         'gender',
-        'date_of_birth'
+        'date_of_birth',
     ];
 
     protected $hidden = [
@@ -68,10 +67,10 @@ class User extends Authenticatable implements JWTSubject
     public function connections(): BelongsToMany
     {
         return $this->belongsToMany(Connection::class, 'connection_users')->whereNull('connection_users.deleted_at')
-                ->orWhere('connections.status', ConnectionStatus::COWORKER);
+            ->orWhere('connections.status', ConnectionStatus::COWORKER);
     }
 
-    public function ownConnections(): HasMany 
+    public function ownConnections(): HasMany
     {
         return $this->hasMany(Connection::class);
     }
@@ -86,7 +85,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->templateGroups->where('status', TemplateStatus::PUBLIC);
     }
 
-    public function coworkers():HasMany
+    public function coworkers(): HasMany
     {
         return $this->hasMany(User::class, 'enterprise_id', 'enterprise_id')
             ->where('id', '!=', $this->id);
@@ -103,8 +102,8 @@ class User extends Authenticatable implements JWTSubject
             ->whereNull('schedule_users.deleted_at')->where('status', ScheduleStatus::PUBLISH);
     }
 
-    public function scopeUserCoworkers($query, $user) {
+    public function scopeUserCoworkers($query, $user)
+    {
         $query->where('enterprise_id', $user->enterprise_id)->whereNot('id', $user->id);
     }
-
 }

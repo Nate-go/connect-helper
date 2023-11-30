@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ScheduleResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         $data = [
@@ -16,7 +15,7 @@ class ScheduleResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
                 'image_url' => $this->user->image_url,
-                'email' => $this->user->email
+                'email' => $this->user->email,
             ],
             'title' => $this->title,
             'content' => $this->content,
@@ -33,8 +32,8 @@ class ScheduleResource extends JsonResource
                     'content' => $contact->content,
                     'connection' => [
                         'name' => $contact->connection->name,
-                        'note' => $contact->connection->note
-                    ]
+                        'note' => $contact->connection->note,
+                    ],
                 ];
             }),
             'users' => $this->users->map(function ($user) {
@@ -42,10 +41,11 @@ class ScheduleResource extends JsonResource
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'image_url' => $user->image_url
+                    'image_url' => $user->image_url,
                 ];
-            })
+            }),
         ];
+
         return $data;
     }
 }

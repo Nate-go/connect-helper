@@ -17,7 +17,7 @@ class Template extends Model
         'subject',
         'content',
         'type',
-        'status'
+        'status',
     ];
 
     public function templateGroup(): BelongsTo

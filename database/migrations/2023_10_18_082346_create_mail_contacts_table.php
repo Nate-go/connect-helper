@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('content', 1000)->nullable();
             $table->integer('type')->nullable();
             $table->timestamps();
-            $table->softDeletes();  
+            $table->softDeletes();
 
             $table->foreign('send_mail_id')->references('id')->on('send_mails');
         });

@@ -1,21 +1,25 @@
 <?php
 
 namespace App\Services\ModelServices;
+
 use App\Jobs\SendMailFromUser;
 use App\Models\Contact;
 use App\Models\SendMailContact;
 
 class SendMailContactService extends BaseService
 {
-    public function __construct(SendMailContact $sendMailContact) {
+    public function __construct(SendMailContact $sendMailContact)
+    {
         $this->model = $sendMailContact;
     }
 
-    public function replaceData($content, $contactId) {
+    public function replaceData($content, $contactId)
+    {
         $contact = Contact::where('id', $contactId)->first();
 
-        if (!$contact)
+        if (! $contact) {
             return false;
+        }
 
         $connection = $contact->connection;
         $user = auth()->user();
@@ -26,23 +30,27 @@ class SendMailContactService extends BaseService
             '@title@' => $contact->title,
             '@content@' => $contact->content,
             '@username@' => $user->name,
-            '@enterprise@' => $user->enterprise->name
+            '@enterprise@' => $user->enterprise->name,
         ];
 
-        foreach($data as $key => $value) {
+        foreach ($data as $key => $value) {
             $content = str_replace($key, $value, $content);
         }
+
         return $content;
     }
 
-    public function sendMail($id) {
+    public function sendMail($id)
+    {
         $sendMailContact = $this->model->where('id', $id)->first();
 
-        if(!$sendMailContact) return false;
+        if (! $sendMailContact) {
+            return false;
+        }
 
         $contact = $sendMailContact->contact;
 
-        $type = "To: " . $contact->content;
+        $type = 'To: '.$contact->content;
         $subject = $sendMailContact->title;
         $content = $sendMailContact->content;
 

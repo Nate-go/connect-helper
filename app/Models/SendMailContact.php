@@ -16,10 +16,10 @@ class SendMailContact extends Model
         'contact_id',
         'title',
         'content',
-        'type', 
+        'type',
     ];
 
-    public function contact(): BelongsTo 
+    public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }

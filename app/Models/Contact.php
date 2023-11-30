@@ -16,7 +16,7 @@ class Contact extends Model
         'connection_id',
         'type',
         'content',
-        'title'
+        'title',
     ];
 
     public function histories(): HasMany
@@ -24,12 +24,12 @@ class Contact extends Model
         return $this->hasMany(ConnectionHistory::class)->orderBy('contacted_at', 'desc');
     }
 
-    public function deleteHistories() 
+    public function deleteHistories()
     {
         $this->histories()->delete();
     }
 
-    public function connection() : BelongsTo 
+    public function connection(): BelongsTo
     {
         return $this->belongsTo(Connection::class);
     }

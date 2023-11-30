@@ -2,6 +2,6 @@
 
 namespace App\Constants;
 
-class BaseConstant {
-    
+class BaseConstant
+{
 }
