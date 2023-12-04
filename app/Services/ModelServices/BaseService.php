@@ -4,6 +4,7 @@ namespace App\Services\ModelServices;
 
 use App\Constants\AuthenConstant\EncryptionKey;
 use App\Constants\UtilConstant;
+use App\Jobs\SendMailFromUser;
 use Carbon\Carbon;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
@@ -110,11 +111,28 @@ class BaseService
 
     public function customDate($dateString)
     {
-        $dateString = str_replace(' ', 'T', $dateString);
-        $date = Carbon::parse($dateString);
+        $date = $this->getDate($dateString);
         $date->addHours(7);
 
         return str_replace(' ', 'T', $date->toDateTimeString());
 
+    }
+
+    public function addSecond($date, $seconds) {
+        if(is_string($date)) {
+            $date = $this->getDate($date);
+        }
+        $date->addSeconds($seconds);
+        return str_replace(' ', 'T', $date->toDateTimeString());
+    }
+
+    public function getDate($dateString) {
+        $dateString = str_replace(' ', 'T', $dateString);
+        $date = Carbon::parse($dateString);
+        return $date;
+    }
+
+    public function addMailToQueue($type, $subject, $content, $user) {
+        SendMailFromUser::dispatch($type, $subject, $content, $user);
     }
 }

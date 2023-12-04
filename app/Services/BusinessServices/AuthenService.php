@@ -44,7 +44,7 @@ class AuthenService
     }
 
     public function response($data, $status) {
-        return $this->response($data, $status);
+        return response()->json($data, $status);
     }
 
     public function authenCreadentials($credentials) {

@@ -75,9 +75,4 @@ class UserController extends Controller
             'data' => $result,
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
-
-    public function getDashboard()
-    {
-        return response()->json($this->userService->getDashboard(auth()->user()), StatusResponse::SUCCESS);
-    }
 }

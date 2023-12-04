@@ -17,3 +17,6 @@ php artisan storage:link
 echo 'Running queue...'
 php artisan queue:restart
 php artisan queue:work &
+
+echo 'Running schedule...'
+php artisan schedule:work &

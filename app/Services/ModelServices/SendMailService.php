@@ -2,6 +2,7 @@
 
 namespace App\Services\ModelServices;
 
+use App\Constants\EmailScheduleConstant\EmailScheduleStatus;
 use App\Constants\SendMailConstant\SendMailType;
 use App\Jobs\SendMailFromUser;
 use App\Models\SendMail;
@@ -10,16 +11,20 @@ class SendMailService extends BaseService
 {
     protected $sendMailContactService;
 
-    public function __construct(SendMail $sendMail, SendMailContactService $sendMailContactService)
+    protected $emailScheduleService;
+
+    public function __construct(SendMail $sendMail, SendMailContactService $sendMailContactService, EmailScheduleService $emailScheduleService)
     {
         $this->model = $sendMail;
         $this->sendMailContactService = $sendMailContactService;
+        $this->emailScheduleService = $emailScheduleService;
     }
 
     public function store($input)
     {
+        $user = auth()->user();
         $sendMail = $this->create([
-            'user_id' => auth()->user()->id,
+            'user_id' => $user->id,
             'name' => $input['name'],
             'title' => $input['title'],
             'content' => $input['content'],
@@ -42,7 +47,20 @@ class SendMailService extends BaseService
             ]);
         }
 
-        $this->sendMail($sendMail->id);
+        $schedule = $input['schedule'] ?? null;
+        if($schedule) {
+            $this->emailScheduleService->create([
+                'user_id' => $user->id,
+                'send_mail_id' => $sendMail->id,
+                'started_at' => $input['schedule']['started_at'],
+                'nextTime_at' => $input['schedule']['started_at'],
+                'after_second' => $input['schedule']['after_second'],
+                'status' => EmailScheduleStatus::RUNNING,
+                'name' => $sendMail->name
+            ]);
+        } else {
+            $this->sendMail($sendMail->id);
+        }
 
         return true;
     }

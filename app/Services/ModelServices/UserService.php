@@ -68,35 +68,8 @@ class UserService extends BaseService
 
         $type = 'Bcc: '.implode(', ', $emails);
 
-        SendMailFromUser::dispatch($type, $subject, $content, $user);
+        $this->addMailToQueue($type, $subject, $content, $user);
 
         return true;
-    }
-
-    public function getDashboard($user, $year)
-    {
-        return $this->getConnectionsByMonth($user, $year);
-    }
-
-    public function getConnectionsByMonth($user, $year)
-    {
-        $connections = $user->connections()
-            ->whereYear('created_at', $year)->get();
-
-        $data = [
-            ConnectionStatus::PUBLIC => [],
-            ConnectionStatus::PRIVATE => [],
-        ];
-        foreach ($connections as $connection) {
-            $month = Carbon::parse($connection->created_at)->month;
-            $status = $connection->status == ConnectionStatus::COWORKER ? ConnectionStatus::PUBLIC : $connection->status;
-            if (isset($data[$connection->status][$month - 1])) {
-                $data[$status][$month - 1] += 1;
-            } else {
-                $data[$status][$month - 1] = 0;
-            }
-        }
-
-        return $data;
     }
 }
