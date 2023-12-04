@@ -30,6 +30,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
+        Schema::table('gmail_tokens', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+
+        });
         Schema::dropIfExists('gmail_tokens');
+
+        Schema::enableForeignKeyConstraints();
     }
 };

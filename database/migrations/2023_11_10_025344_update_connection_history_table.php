@@ -15,12 +15,11 @@ return new class extends Migration
             $table->string('link')->nullable();
         });
     }
-    
+
     public function down(): void
     {
         Schema::table('connection_histories', function (Blueprint $table) {
             $table->dropColumn('link');
         });
     }
-
 };

@@ -16,7 +16,7 @@ class ConnectionHistory extends Model
         'contact_id',
         'contacted_at',
         'type',
-        'link'
+        'link',
     ];
 
     public function contact(): BelongsTo

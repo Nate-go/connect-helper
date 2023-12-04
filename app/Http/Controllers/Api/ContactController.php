@@ -12,7 +12,8 @@ class ContactController extends Controller
 {
     protected $contactService;
 
-    public function __construct(ContactService $contactService) {
+    public function __construct(ContactService $contactService)
+    {
         $this->contactService = $contactService;
     }
 
@@ -29,6 +30,7 @@ class ContactController extends Controller
     public function store(StoreContactFormRequest $request)
     {
         $result = $this->contactService->create($request->all());
+
         return response()->json([
             'message' => $result ? 'Create contact successfull' : 'Create contact fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
@@ -47,6 +49,7 @@ class ContactController extends Controller
     public function update(Request $request, string $id)
     {
         $result = $this->contactService->update([$id], $request->all());
+
         return response()->json([
             'message' => $result ? 'Update contact successfull' : 'Update contact fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
@@ -55,6 +58,7 @@ class ContactController extends Controller
     public function destroy(string $id)
     {
         $result = $this->contactService->delete($id);
+
         return response()->json([
             'message' => $result ? 'Delete contact successfull' : 'Delete contact fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);

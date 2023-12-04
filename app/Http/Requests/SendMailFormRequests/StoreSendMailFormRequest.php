@@ -26,7 +26,7 @@ class StoreSendMailFormRequest extends FormRequest
             'title' => 'required|string',
             'content' => 'required|string',
             'type' => 'required',
-            'contactIds' => 'required|array'
+            'contactIds' => 'required|array',
         ];
     }
 }

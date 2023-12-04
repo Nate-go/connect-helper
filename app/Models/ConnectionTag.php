@@ -12,6 +12,6 @@ class ConnectionTag extends Model
 
     protected $fillable = [
         'connection_id',
-        'tag_id'
+        'tag_id',
     ];
 }

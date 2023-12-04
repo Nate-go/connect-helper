@@ -27,6 +27,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
+
+        Schema::table('tags', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::dropIfExists('tags');
+
+        Schema::enableForeignKeyConstraints();
     }
 };

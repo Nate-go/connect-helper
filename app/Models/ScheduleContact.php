@@ -12,6 +12,6 @@ class ScheduleContact extends Model
 
     protected $fillable = [
         'schedule_id',
-        'contact_id'
+        'contact_id',
     ];
 }

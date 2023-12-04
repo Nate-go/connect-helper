@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\ModelServices;
+
 use App\Constants\ConnectionHistoryConstant\ConnectionHistoryType;
 use App\Jobs\UpdateHistory;
 use App\Models\Connection;
@@ -11,7 +12,8 @@ class ConnectionHistoryService extends BaseService
 {
     protected $gmailTokenService;
 
-    public function __construct(ConnectionHistory $connectionHistory, GmailTokenService $gmailTokenService) {
+    public function __construct(ConnectionHistory $connectionHistory, GmailTokenService $gmailTokenService)
+    {
         $this->model = $connectionHistory;
         $this->gmailTokenService = $gmailTokenService;
     }
@@ -49,7 +51,8 @@ class ConnectionHistoryService extends BaseService
         }
     }
 
-    public function setUp($user, $contact, $service) {
+    public function setUp($user, $contact, $service)
+    {
         try {
             $messages = $this->getFutureMessages($user, $contact, $service);
             foreach ($messages as $message) {
@@ -77,7 +80,7 @@ class ConnectionHistoryService extends BaseService
                     'contact_id' => $contact->id,
                     'contacted_at' => $sentTime,
                     'type' => $type,
-                    'link' => "https://mail.google.com/mail/u/0/#inbox/{$message->getId()}"
+                    'link' => "https://mail.google.com/mail/u/0/#inbox/{$message->getId()}",
                 ]);
             }
 
@@ -86,13 +89,14 @@ class ConnectionHistoryService extends BaseService
         }
     }
 
-    public function updateConnectionHistories($connection) {
-
-        if(is_numeric($connection)) {
+    public function updateConnectionHistories($connection)
+    {
+        if (is_numeric($connection)) {
             $connection = Connection::where('id', $connection)->first();
 
-            if (!$connection)
+            if (! $connection) {
                 return false;
+            }
         }
 
         $users = $connection->users;
@@ -108,9 +112,10 @@ class ConnectionHistoryService extends BaseService
         return true;
     }
 
-    public function updateUserHistories($user) {
+    public function updateUserHistories($user)
+    {
         $connections = $user->connections;
-        foreach($connections as $connection) {
+        foreach ($connections as $connection) {
             $this->updateConnectionHistories($connection);
         }
 

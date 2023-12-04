@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthenController;
 use App\Http\Controllers\Api\ConnectionController;
 use App\Http\Controllers\Api\ConnectionHistoryController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\EnterpriseController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\SendMailController;
 use App\Http\Controllers\Api\TagController;
@@ -41,14 +42,23 @@ Route::group(['prefix' => 'auth'], function () {
     Route::get('/google/token', [AuthenController::class, 'getGoogleToken']);
 });
 
-Route::middleware('auth:api')->group(function() {
-    Route::middleware('author:' . UserRole::ADMIN)->group(function () {
-        Route::controller(UserController::class)->prefix('users')->group(function () {
-            Route::get('/', [UserController::class,'index'])->name('getAllUser');
-            
-        });
+Route::middleware('auth:api')->group(function () {
+    // Route::middleware('author:' . UserRole::ADMIN)->group(function () {
+    //     Route::controller(UserController::class)->prefix('users')->group(function () {
+    //         Route::get('/', [UserController::class,'index'])->name('getAllUser');
+
+    //     });
+    // });
+
+    Route::controller(UserController::class)->prefix('users')->group(function () {
+        Route::get('/', 'index')->name('getAllUser');
+        Route::get('/dashboard', 'getDashboard')->name('getDashboard');
     });
-    
+
+    Route::controller(EnterpriseController::class)->prefix('enterprises')->group(function () {
+        Route::get('/', 'index')->name('getAllEnterprise');
+    });
+
     Route::controller(AuthenController::class)->group(function () {
         Route::name('auth.')->group(function () {
             Route::post('/logout', 'logout')->name('logout');
@@ -95,7 +105,7 @@ Route::middleware('auth:api')->group(function() {
     Route::controller(ContactController::class)->group(function () {
         Route::prefix('contacts')->name('contact.')->group(function () {
             Route::put('/{tag_id}', 'update')->name('update');
-            Route::delete('/{tag_id}', 'destroy')->name('delete'); 
+            Route::delete('/{tag_id}', 'destroy')->name('delete');
             Route::post('', 'store')->name('store');
         });
     });
@@ -140,7 +150,7 @@ Route::middleware('auth:api')->group(function() {
             Route::post('/{id}/add-members', 'addMembers')->name('addMember');
             Route::get('/{id}', 'show')->name('show');
             Route::delete('', 'delete')->name('delete');
-            Route::delete('/{id}/delete-members', 'deleteMembers')->name('delete');
+            Route::delete('/{id}/delete-members', 'deleteMembers')->name('deleteMember');
             Route::get('', 'index')->name('index');
             Route::put('', 'update')->name('update');
             Route::put('/{id}/publish', 'publish')->name('publish');

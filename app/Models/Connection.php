@@ -17,14 +17,15 @@ class Connection extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 
+        'name',
         'note',
         'status',
         'user_id',
-        'enterprise_id'
+        'enterprise_id',
+        'contact_id',
     ];
 
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -34,12 +35,17 @@ class Connection extends Model
         return $this->belongsToMany(User::class, 'connection_users')->whereNull('connection_users.deleted_at');
     }
 
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class);
     }
 
-    public function mailContacts() : HasMany
+    public function mailContacts(): HasMany
     {
         return $this->contacts()->where('type', ContactType::MAIL);
     }
@@ -74,13 +80,15 @@ class Connection extends Model
         $query->whereIn('status', $values);
     }
 
-    public function scopeEnterpriseConnection($query) {
+    public function scopeEnterpriseConnection($query)
+    {
         $query->where('user_id', auth()->user()->id)
-            ->orWhere('status', ConnectionStatus::COWORKER)
             ->orWhere(function ($query) {
                 $query->where('enterprise_id', auth()->user()->enterprise_id)
-                    ->where('status', ConnectionStatus::PUBLIC);
+                    ->where(function ($query) {
+                        $query->where('status', ConnectionStatus::PUBLIC)
+                            ->orWhere('status', ConnectionStatus::COWORKER);
+                    });
             });
     }
-
 }

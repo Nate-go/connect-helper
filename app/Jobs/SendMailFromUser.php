@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Services\ModelServices\GmailTokenService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -29,7 +28,6 @@ class SendMailFromUser implements ShouldQueue
         $this->content = $content;
         $this->user = $user;
     }
-
 
     public function handle(GmailTokenService $gmailTokenService): void
     {

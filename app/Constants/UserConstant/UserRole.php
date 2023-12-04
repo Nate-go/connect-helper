@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Constants\UserConstant;
+
 use App\Constants\BaseConstant;
 
 class UserRole extends BaseConstant

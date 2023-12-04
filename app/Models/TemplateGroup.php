@@ -5,9 +5,9 @@ namespace App\Models;
 use App\Constants\TemplateConstant\TemplateStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TemplateGroup extends Model
 {
@@ -17,10 +17,10 @@ class TemplateGroup extends Model
         'enterprise_id',
         'user_id',
         'name',
-        'status'
+        'status',
     ];
 
-    public function templates():HasMany
+    public function templates(): HasMany
     {
         return $this->hasMany(Template::class);
     }
@@ -44,13 +44,16 @@ class TemplateGroup extends Model
         $query->where('user_id', auth()->user()->id)
             ->orWhere(function ($query) {
                 $query->where('enterprise_id', auth()->user()->enterprise_id)
-                    ->where('status', TemplateStatus::PUBLIC );
+                    ->where('status', TemplateStatus::PUBLIC);
             });
     }
 
-    public function publicTemplates():HasMany
+    public function publicTemplates(): HasMany
     {
-        if($this->user_id == auth()->user()->id) return $this->hasMany(Template::class);
+        if ($this->user_id == auth()->user()->id) {
+            return $this->hasMany(Template::class);
+        }
+
         return $this->hasMany(Template::class)->where('status', TemplateStatus::PUBLIC);
     }
 }

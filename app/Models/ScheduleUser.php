@@ -12,6 +12,6 @@ class ScheduleUser extends Model
 
     protected $fillable = [
         'schedule_id',
-        'user_id'
+        'user_id',
     ];
 }

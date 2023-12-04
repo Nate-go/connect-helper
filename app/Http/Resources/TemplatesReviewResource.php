@@ -17,8 +17,9 @@ class TemplatesReviewResource extends JsonResource
         $data = [
             'id' => $this->id,
             'name' => $this->name,
-            'templates' => $this->publicTemplates
+            'templates' => $this->publicTemplates,
         ];
+
         return $data;
     }
 }

@@ -25,7 +25,7 @@ class SignUpFormRequest extends FormRequest
             'name' => 'required|string|between:2,100',
             'gmail_token' => 'required',
             'password' => 'required|string|confirmed|min:6',
-            'enterprise' => 'required|string'
+            'enterprise' => 'required|string',
         ];
     }
 }

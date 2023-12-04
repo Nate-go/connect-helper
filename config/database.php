@@ -79,6 +79,19 @@ return [
             'timezone' => 'Asia/Bangkok',
         ],
 
+        'pgsql_testing' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'your_testing_db_name'),
+            'username' => env('DB_USERNAME', 'your_db_username'),
+            'password' => env('DB_PASSWORD', 'your_db_password'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),

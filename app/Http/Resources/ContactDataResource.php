@@ -19,13 +19,13 @@ class ContactDataResource extends JsonResource
                     'type' => $history->type,
                     'link' => $history->link,
                     'user' => [
-                            'id' => $history->user->id,
-                            'name' => $history->user->name,
-                            'image_url' => $history->user->image_url,
-                            'email' => $history->user->email
-                        ]
+                        'id' => $history->user->id,
+                        'name' => $history->user->name,
+                        'image_url' => $history->user->image_url,
+                        'email' => $history->user->email,
+                    ],
                 ];
-            })
+            }),
         ];
     }
 }

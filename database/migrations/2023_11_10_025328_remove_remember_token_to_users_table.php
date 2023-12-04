@@ -18,8 +18,6 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {
@@ -27,5 +25,4 @@ return new class extends Migration
             $table->string('remember_token', 400)->nullable()->after('password');
         });
     }
-
 };

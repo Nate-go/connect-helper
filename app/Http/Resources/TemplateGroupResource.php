@@ -22,15 +22,16 @@ class TemplateGroupResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
                 'image_url' => $this->user->image_url,
-                'email' => $this->user->email
+                'email' => $this->user->email,
             ],
             'templates' => $this->publicTemplates->map(function ($template) {
                 return [
                     'id' => $template->id,
                     'name' => $template->name,
                 ];
-            })
+            }),
         ];
+
         return $data;
     }
 }

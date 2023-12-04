@@ -17,10 +17,11 @@ class ConnectionResource extends JsonResource
             'status' => $this->status,
             'owner' => $this->user?->name,
             'created_at' => $this->created_at,
-            'tags' => $this->tags->where('user_id', auth()->user()->id)->map(function($tag) {
+            'contact_id' => $this->contact_id,
+            'tags' => $this->tags->map(function ($tag) {
                 return [
                     'id' => $tag->id,
-                    'name'=> $tag->name,
+                    'name' => $tag->name,
                 ];
             }),
             'users' => $this->users->pluck('name')->toArray(),

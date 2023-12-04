@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Services\ModelServices\ConnectionHistoryService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,7 +25,6 @@ class UpdateHistory implements ShouldQueue
         $this->mailContact = $mailContact;
         $this->service = $service;
     }
-
 
     public function handle(ConnectionHistoryService $connectionHistoryService): void
     {

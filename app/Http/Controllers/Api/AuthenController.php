@@ -13,18 +13,17 @@ use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
 use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
 use App\Services\BusinessServices\AuthenService;
 use App\Services\ModelServices\ConnectionService;
-use Http;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenController extends Controller
 {
     protected $authenService;
+
     protected $connectionService;
 
     public function __construct(AuthenService $authenService, ConnectionService $connectionService)
     {
-        $this->authenService = $authenService; 
+        $this->authenService = $authenService;
         $this->connectionService = $connectionService;
     }
 
@@ -37,14 +36,15 @@ class AuthenController extends Controller
     {
         return $this->authenService->signup($request->all());
     }
-    
-    public function signupEmployee(SignUpEmployeeFormRequest $request) {
+
+    public function signupEmployee(SignUpEmployeeFormRequest $request)
+    {
         return $this->authenService->signupEmployee($request->all());
     }
 
     public function logout()
     {
-        return $this->authenService->logout();  
+        return $this->authenService->logout();
     }
 
     public function throwAuthenError()
@@ -59,12 +59,13 @@ class AuthenController extends Controller
 
     public function refresh(RefreshFormRequest $request)
     {
-        $result =  $this->authenService->refresh($request->get('remember_token'));
-        if(!$result) {
+        $result = $this->authenService->refresh($request->get('remember_token'));
+        if (! $result) {
             return response()->json([
-                'error'=> 'Can not find out this remember token',
+                'error' => 'Can not find out this remember token',
             ], StatusResponse::ERROR);
         }
+
         return response()->json($result, StatusResponse::SUCCESS);
     }
 
@@ -83,25 +84,30 @@ class AuthenController extends Controller
         return $this->authenService->resetPassWord($request->all());
     }
 
-    public function sendVerify(SendVerifyFormRequest $request) {
+    public function sendVerify(SendVerifyFormRequest $request)
+    {
         return $this->authenService->sendVerify($request->all());
     }
 
-    public function activeAccount(VerifyAccountFormRequest $request) {
+    public function activeAccount(VerifyAccountFormRequest $request)
+    {
         return $this->authenService->activeAccount($request->all());
     }
 
-    public function checkInviteToken(Request $request) {
+    public function checkInviteToken(Request $request)
+    {
         $result = $this->authenService->checkInviteToken($request->get('token') ?? '');
-        if (!$result) {
+        if (! $result) {
             return response()->json([
                 'message' => 'This invitation is expired or not right',
             ], StatusResponse::ERROR);
         }
+
         return response()->json($result, StatusResponse::SUCCESS);
     }
 
-    public function test(Request $request) {
+    public function test(Request $request)
+    {
         return $this->connectionService->test();
     }
 }

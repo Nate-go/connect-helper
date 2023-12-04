@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('content', 1000)->nullable();
             $table->integer('type')->nullable();
             $table->timestamps();
-            $table->softDeletes();  
+            $table->softDeletes();
 
             $table->foreign('send_mail_id')->references('id')->on('send_mails');
         });
@@ -30,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('send_mail_contacts', function (Blueprint $table) {
+            $table->dropForeign(['send_mail_id']);
+
+        });
         Schema::dropIfExists('send_mail_contacts');
     }
 };

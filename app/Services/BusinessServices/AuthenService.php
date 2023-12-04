@@ -10,20 +10,16 @@ use App\Constants\UserConstant\UserVerifyTime;
 use App\Http\Resources\UserInformation;
 use App\Jobs\SendMailQueue;
 use App\Jobs\SetupDataForUser;
-
 use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
 use App\Services\ModelServices\GmailTokenService;
-use App\Services\ModelServices\TemplateGroupService;
 use App\Services\ModelServices\UserService;
 use DateInterval;
 use DateTime;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Key;
 use Hash;
-
-
 
 class AuthenService
 {
@@ -36,32 +32,41 @@ class AuthenService
     protected $connectionService;
 
     public function __construct(
-            EnterpriseService $enterpriseService, 
-            UserService $userService, 
-            GmailTokenService $gmailTokenService,
-            ConnectionService $connectionService,
-        ) {
+        EnterpriseService $enterpriseService,
+        UserService $userService,
+        GmailTokenService $gmailTokenService,
+        ConnectionService $connectionService,
+    ) {
         $this->enterpriseService = $enterpriseService;
         $this->userService = $userService;
         $this->gmailTokenService = $gmailTokenService;
         $this->connectionService = $connectionService;
     }
 
-    public function login($input) {
+    public function response($data, $status) {
+        return $this->response($data, $status);
+    }
+
+    public function authenCreadentials($credentials) {
+        return auth()->attempt($credentials);
+    }
+
+    public function login($input)
+    {
         $remember = $input['remember'] ?? false;
         $rememberToken = null;
-        $credentials = ['email'=> $input['email'],'password'=> $input['password']];
+        $credentials = ['email' => $input['email'], 'password' => $input['password']];
 
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(["message" => 'User authentication failed'], StatusResponse::UNAUTHORIZED);
+        if (! $token = $this->authenCreadentials($credentials)) {
+            return $this->response(['message' => 'User authentication failed'], StatusResponse::UNAUTHORIZED);
         }
 
         if ($remember) {
             $rememberToken = $this->encryptToken(array_merge(
-                $credentials, 
+                $credentials,
                 [
                     'remember' => true,
-                    'time' => now()
+                    'time' => now(),
                 ]
             ));
         }
@@ -69,17 +74,19 @@ class AuthenService
         return $this->createNewToken($token, $rememberToken);
     }
 
-    private function encryptToken($data)
+    public function encryptToken($data)
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $encryptedData = Crypto::encrypt(json_encode($data), $key);
+
         return $encryptedData;
     }
 
-    private function decryptToken($encryptedData)
+    public function decryptToken($encryptedData)
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $decryptedData = Crypto::decrypt($encryptedData, $key);
+
         return json_decode($decryptedData, true);
     }
 
@@ -89,19 +96,19 @@ class AuthenService
         $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
 
         if ($this->userService->isEmailExist($data['email'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
         }
 
         if ($this->enterpriseService->isExisted($input['enterprise'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This enterprise has been used',
             ], StatusResponse::ERROR);
         }
 
         $enterprise = $this->enterpriseService->create([
-            'name' => $input['enterprise']
+            'name' => $input['enterprise'],
         ]);
 
         $user = $this->userService->create([
@@ -111,23 +118,23 @@ class AuthenService
             'password' => Hash::make($input['password']),
             'role' => UserRole::OWNER,
             'status' => UserStatus::ACTIVE,
-            'image_url' => $data['picture']
+            'image_url' => $data['picture'],
         ]);
 
         $this->gmailTokenService->create(array_merge(
-                $gmailToken, 
-                [
-                    'user_id' => $user->id,
-                    'expiresed_at' => now()->addSeconds($gmailToken['expires_in'])
-                ]
-            )
+            $gmailToken,
+            [
+                'user_id' => $user->id,
+                'expiresed_at' => now()->addSeconds($gmailToken['expires_in']),
+            ]
+        )
         );
 
         SetupDataForUser::dispatch($user);
 
-        return response()->json([
+        return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
-            'user' => $user
+            'user' => $user,
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
@@ -135,8 +142,8 @@ class AuthenService
     {
         $enterpriseId = $this->getEnterpriseId($input['token']);
 
-        if(!$enterpriseId) {
-            return response()->json([
+        if (! $enterpriseId) {
+            return $this->response([
                 'message' => 'Token is not true',
             ], StatusResponse::ERROR);
         }
@@ -145,7 +152,7 @@ class AuthenService
         $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
 
         if ($this->userService->isEmailExist($data['email'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
         }
@@ -157,7 +164,7 @@ class AuthenService
             'password' => Hash::make($input['password']),
             'role' => UserRole::EMPLOYEE,
             'status' => UserStatus::ACTIVE,
-            'image_url' => $data['picture']
+            'image_url' => $data['picture'],
         ]);
 
         $this->gmailTokenService->create(
@@ -165,37 +172,42 @@ class AuthenService
                 $gmailToken,
                 [
                     'user_id' => $user->id,
-                    'expiresed_at' => now()->addSeconds($gmailToken['expires_in'])
+                    'expiresed_at' => now()->addSeconds($gmailToken['expires_in']),
                 ]
             )
         );
 
         SetupDataForUser::dispatch($user);
 
-        return response()->json([
+        return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
-            'user' => $user
+            'user' => $user,
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    private function getEnterpriseId($token) {
+    public function getEnterpriseId($token)
+    {
         $data = $this->decryptToken($token);
-        if (!isset($data['enterpriseId'])) {
+        if (! isset($data['enterpriseId'])) {
             return false;
         }
+
         return $data['enterpriseId'];
     }
 
-    private function generateEncodedString($startTime, $endTime, $userData) {
-        $dataToEncode = $startTime . '|' . $endTime . '|' . $userData;
+    public function generateEncodedString($startTime, $endTime, $userData)
+    {
+        $dataToEncode = $startTime.'|'.$endTime.'|'.$userData;
+
         return Hash::make($dataToEncode);
     }
 
-    private function createVerify($email) {
+    public function createVerify($email)
+    {
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
-            return null; 
+        if (! $user) {
+            return null;
         }
 
         $currentDateTime = new DateTime();
@@ -213,77 +225,81 @@ class AuthenService
         return $verify->verify_code;
     }
 
-    public function sendVerify($input) {
+    public function sendVerify($input)
+    {
         $verify_code = $this->createVerify($input['email']);
 
-        if(!$verify_code ) {
-            return response()->json([
-                "message" => 'Can not find out the email'
+        if (! $verify_code) {
+            return $this->response([
+                'message' => 'Can not find out the email',
             ], StatusResponse::ERROR);
         }
 
-        return response()->json([
-            'message'=> 'Send verify code successfully',
+        return $this->response([
+            'message' => 'Send verify code successfully',
         ], StatusResponse::SUCCESS);
     }
+
     public function logout()
     {
         auth()->logout();
-        return response()->json(['message' => 'User successfully signed out'], StatusResponse::SUCCESS);
+
+        return $this->response(['message' => 'User successfully signed out'], StatusResponse::SUCCESS);
     }
 
     public function throwAuthenError()
     {
-        return response()->json(["message" => "You need to login to access"], StatusResponse::UNAUTHORIZED);
+        return $this->response(['message' => 'You need to login to access'], StatusResponse::UNAUTHORIZED);
     }
 
     public function throwAuthorError()
     {
-        return response()->json(["message" => "You do not have permission to access"], StatusResponse::UNAUTHORIZED);
+        return $this->response(['message' => 'You do not have permission to access'], StatusResponse::UNAUTHORIZED);
     }
 
     public function refresh($rememberToken)
     {
-        $user = User::where("remember_token", $rememberToken)->first();
+        $user = User::where('remember_token', $rememberToken)->first();
 
-        if(!$user) {
+        if (! $user) {
             return false;
         }
 
         $data = $this->decryptToken($rememberToken);
+
         return $this->login($data);
     }
 
     public function getUserProfile()
     {
-        return response()->json(auth()->user(), StatusResponse::SUCCESS);
+        return $this->response(auth()->user(), StatusResponse::SUCCESS);
     }
 
-    protected function createNewToken($token, $rememberToken)
+    public function createNewToken($token, $rememberToken)
     {
         $user = auth()->user();
 
-        if($user->status == UserStatus::DEACTIVE) {
-            return response()->json([
-                "message"=> "Your account is deactived"
+        if ($user->status == UserStatus::DEACTIVE) {
+            return $this->response([
+                'message' => 'Your account is deactived',
             ], StatusResponse::DEACTIVED_ACCOUNT);
         }
 
         if ($user->status == UserStatus::BLOCK) {
-            return response()->json([
-                "message" => "Your account is blocked"
+            return $this->response([
+                'message' => 'Your account is blocked',
             ], StatusResponse::BLOCKED_ACCOUNT);
         }
 
         $user->remember_token = $rememberToken;
         $user->save();
 
-        return response()->json([
+        return $this->response([
             'access_token' => $token,
             'remember_token' => $rememberToken,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => json_decode(json_encode(new UserInformation(auth()->user())))
+            'user' => json_decode(json_encode(new UserInformation(auth()->user()))),
         ], StatusResponse::SUCCESS);
     }
 
@@ -297,7 +313,7 @@ class AuthenService
             ->first();
 
         $result = $this->checkVerifyAccount($user, $verify_code);
-        
+
         if ($result) {
             return $result;
         }
@@ -306,8 +322,8 @@ class AuthenService
         $user->account_verify->delete();
         $user->save();
 
-        return response()->json([
-            'message' => 'Activate account successfully'
+        return $this->response([
+            'message' => 'Activate account successfully',
         ], StatusResponse::SUCCESS);
     }
 
@@ -328,24 +344,24 @@ class AuthenService
         $user->account_verify->delete();
         $user->save();
 
-        return response()->json([
-            'message' => 'Change password successfully'
+        return $this->response([
+            'message' => 'Change password successfully',
         ], StatusResponse::SUCCESS);
     }
 
-    private function checkVerifyAccount($user, $verify_code)
+    public function checkVerifyAccount($user, $verify_code)
     {
-        if (!$user) {
-            return response()->json([
-                'message' => 'Can not find user or user is already active'
+        if (! $user) {
+            return $this->response([
+                'message' => 'Can not find user or user is already active',
             ], StatusResponse::ERROR);
         }
 
         $accountVerify = $user->account_verify;
 
-        if (!$accountVerify or $accountVerify->overtimed_at < now() or $accountVerify->verify_code != $verify_code) {
-            return response()->json([
-                'message' => 'Your verify code is invalid'
+        if (! $accountVerify or $accountVerify->overtimed_at < now() or $accountVerify->verify_code != $verify_code) {
+            return $this->response([
+                'message' => 'Your verify code is invalid',
             ], StatusResponse::ERROR);
         }
 
@@ -355,9 +371,10 @@ class AuthenService
     public function checkInviteToken($token)
     {
         $data = $this->decryptToken($token);
-        if (!isset($data['enterprise']) && !($data['expired_at'] > now())) {
+        if (! isset($data['enterprise']) && ! ($data['expired_at'] > now())) {
             return false;
         }
+
         return [
             'enterprise' => $data['enterprise'],
             'token' => $this->encryptToken([
