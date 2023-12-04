@@ -17,7 +17,7 @@ class EnterpriseService extends BaseService
     {
         $search = $input['search'] ?? '';
 
-        $query = $this->model->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($search).'%'])->whereNot('name', 'Admin');
+        $query = $this->model->with('users')->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($search).'%'])->whereNot('name', 'Admin');
         $data = $this->getAll($input, $query);
         $data['items'] = EnterpriseResource::collection($data['items']);
 

@@ -26,6 +26,7 @@ class EditConnectionFormRequest extends FormRequest
             'name' => 'required|string',
             'note' => 'required|string',
             'status' => 'required',
+            'contact_id' => 'required'
         ];
     }
 }

@@ -43,14 +43,22 @@ class AuthenService
         $this->connectionService = $connectionService;
     }
 
+    public function response($data, $status) {
+        return $this->response($data, $status);
+    }
+
+    public function authenCreadentials($credentials) {
+        return auth()->attempt($credentials);
+    }
+
     public function login($input)
     {
         $remember = $input['remember'] ?? false;
         $rememberToken = null;
         $credentials = ['email' => $input['email'], 'password' => $input['password']];
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['message' => 'User authentication failed'], StatusResponse::UNAUTHORIZED);
+        if (! $token = $this->authenCreadentials($credentials)) {
+            return $this->response(['message' => 'User authentication failed'], StatusResponse::UNAUTHORIZED);
         }
 
         if ($remember) {
@@ -66,7 +74,7 @@ class AuthenService
         return $this->createNewToken($token, $rememberToken);
     }
 
-    private function encryptToken($data)
+    public function encryptToken($data)
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $encryptedData = Crypto::encrypt(json_encode($data), $key);
@@ -74,7 +82,7 @@ class AuthenService
         return $encryptedData;
     }
 
-    private function decryptToken($encryptedData)
+    public function decryptToken($encryptedData)
     {
         $key = Key::loadFromAsciiSafeString(EncryptionKey::REFRESH_KEY);
         $decryptedData = Crypto::decrypt($encryptedData, $key);
@@ -88,13 +96,13 @@ class AuthenService
         $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
 
         if ($this->userService->isEmailExist($data['email'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
         }
 
         if ($this->enterpriseService->isExisted($input['enterprise'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This enterprise has been used',
             ], StatusResponse::ERROR);
         }
@@ -124,7 +132,7 @@ class AuthenService
 
         SetupDataForUser::dispatch($user);
 
-        return response()->json([
+        return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
             'user' => $user,
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
@@ -135,7 +143,7 @@ class AuthenService
         $enterpriseId = $this->getEnterpriseId($input['token']);
 
         if (! $enterpriseId) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Token is not true',
             ], StatusResponse::ERROR);
         }
@@ -144,7 +152,7 @@ class AuthenService
         $data = $this->gmailTokenService->getEmailInforFromToken($gmailToken['id_token']);
 
         if ($this->userService->isEmailExist($data['email'])) {
-            return response()->json([
+            return $this->response([
                 'message' => 'This email has been used',
             ], StatusResponse::ERROR);
         }
@@ -171,13 +179,13 @@ class AuthenService
 
         SetupDataForUser::dispatch($user);
 
-        return response()->json([
+        return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
             'user' => $user,
         ], $user ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
 
-    private function getEnterpriseId($token)
+    public function getEnterpriseId($token)
     {
         $data = $this->decryptToken($token);
         if (! isset($data['enterpriseId'])) {
@@ -187,14 +195,14 @@ class AuthenService
         return $data['enterpriseId'];
     }
 
-    private function generateEncodedString($startTime, $endTime, $userData)
+    public function generateEncodedString($startTime, $endTime, $userData)
     {
         $dataToEncode = $startTime.'|'.$endTime.'|'.$userData;
 
         return Hash::make($dataToEncode);
     }
 
-    private function createVerify($email)
+    public function createVerify($email)
     {
         $user = User::where('email', $email)->first();
 
@@ -222,12 +230,12 @@ class AuthenService
         $verify_code = $this->createVerify($input['email']);
 
         if (! $verify_code) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Can not find out the email',
             ], StatusResponse::ERROR);
         }
 
-        return response()->json([
+        return $this->response([
             'message' => 'Send verify code successfully',
         ], StatusResponse::SUCCESS);
     }
@@ -236,17 +244,17 @@ class AuthenService
     {
         auth()->logout();
 
-        return response()->json(['message' => 'User successfully signed out'], StatusResponse::SUCCESS);
+        return $this->response(['message' => 'User successfully signed out'], StatusResponse::SUCCESS);
     }
 
     public function throwAuthenError()
     {
-        return response()->json(['message' => 'You need to login to access'], StatusResponse::UNAUTHORIZED);
+        return $this->response(['message' => 'You need to login to access'], StatusResponse::UNAUTHORIZED);
     }
 
     public function throwAuthorError()
     {
-        return response()->json(['message' => 'You do not have permission to access'], StatusResponse::UNAUTHORIZED);
+        return $this->response(['message' => 'You do not have permission to access'], StatusResponse::UNAUTHORIZED);
     }
 
     public function refresh($rememberToken)
@@ -264,21 +272,21 @@ class AuthenService
 
     public function getUserProfile()
     {
-        return response()->json(auth()->user(), StatusResponse::SUCCESS);
+        return $this->response(auth()->user(), StatusResponse::SUCCESS);
     }
 
-    protected function createNewToken($token, $rememberToken)
+    public function createNewToken($token, $rememberToken)
     {
         $user = auth()->user();
 
         if ($user->status == UserStatus::DEACTIVE) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Your account is deactived',
             ], StatusResponse::DEACTIVED_ACCOUNT);
         }
 
         if ($user->status == UserStatus::BLOCK) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Your account is blocked',
             ], StatusResponse::BLOCKED_ACCOUNT);
         }
@@ -286,7 +294,7 @@ class AuthenService
         $user->remember_token = $rememberToken;
         $user->save();
 
-        return response()->json([
+        return $this->response([
             'access_token' => $token,
             'remember_token' => $rememberToken,
             'token_type' => 'bearer',
@@ -314,7 +322,7 @@ class AuthenService
         $user->account_verify->delete();
         $user->save();
 
-        return response()->json([
+        return $this->response([
             'message' => 'Activate account successfully',
         ], StatusResponse::SUCCESS);
     }
@@ -336,15 +344,15 @@ class AuthenService
         $user->account_verify->delete();
         $user->save();
 
-        return response()->json([
+        return $this->response([
             'message' => 'Change password successfully',
         ], StatusResponse::SUCCESS);
     }
 
-    private function checkVerifyAccount($user, $verify_code)
+    public function checkVerifyAccount($user, $verify_code)
     {
         if (! $user) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Can not find user or user is already active',
             ], StatusResponse::ERROR);
         }
@@ -352,7 +360,7 @@ class AuthenService
         $accountVerify = $user->account_verify;
 
         if (! $accountVerify or $accountVerify->overtimed_at < now() or $accountVerify->verify_code != $verify_code) {
-            return response()->json([
+            return $this->response([
                 'message' => 'Your verify code is invalid',
             ], StatusResponse::ERROR);
         }

@@ -17,6 +17,7 @@ class ConnectionResource extends JsonResource
             'status' => $this->status,
             'owner' => $this->user?->name,
             'created_at' => $this->created_at,
+            'contact_id' => $this->contact_id,
             'tags' => $this->tags->map(function ($tag) {
                 return [
                     'id' => $tag->id,

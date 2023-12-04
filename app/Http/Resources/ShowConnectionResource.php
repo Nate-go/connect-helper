@@ -15,6 +15,7 @@ class ShowConnectionResource extends JsonResource
             'note' => $this->note,
             'type' => $this->type,
             'status' => $this->status,
+            'contact_id' => $this->contact_id,
             'owner' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,

@@ -37,7 +37,7 @@ class ScheduleService extends BaseService
 
     public function show($id)
     {
-        $schedule = $this->model->with(['user', 'contact', 'users'])->where('id', $id)->first();
+        $schedule = $this->model->with(['user', 'contacts' => ['connection'], 'users'])->where('id', $id)->first();
 
         if (! $schedule) {
             return false;

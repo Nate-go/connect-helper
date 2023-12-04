@@ -138,14 +138,17 @@ class ConnectionService extends BaseService
             'status' => $status,
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id,
-
         ]);
 
-        $this->contactService->create([
+        $contact = $this->contactService->create([
             'connection_id' => $connection->id,
             'content' => $email,
             'type' => ContactType::MAIL,
             'title' => 'Default',
+        ]);
+
+        $connection->update([
+            'contact_id' => $contact->id
         ]);
 
         $this->createConnectionUser($user->id, $connection->id);
@@ -281,12 +284,14 @@ class ConnectionService extends BaseService
         $ownerId = $input['ownerId'];
         $status = $input['status'];
         $tagIds = $input['tagIds'];
+        $contact_id = $input['contact_id'];
 
         $connection->update([
             'name' => $name,
             'note' => $note,
             'status' => $status,
             'user_id' => $ownerId,
+            'contact_id' => $contact_id
         ]);
 
         $currentTagIds = $connection->tags()->pluck('tags.id')->toArray();
@@ -352,6 +357,7 @@ class ConnectionService extends BaseService
                 'name' => $connection->name,
                 'note' => $connection->note,
                 'contacts' => $connection->mailContacts,
+                'contact_id' => $connection->contact_id
             ];
         });
     }
