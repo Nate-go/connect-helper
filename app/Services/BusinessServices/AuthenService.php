@@ -125,7 +125,7 @@ class AuthenService
             $gmailToken,
             [
                 'user_id' => $user->id,
-                'expiresed_at' => now()->addSeconds($gmailToken['expires_in']),
+                'expired_at' => now()->addSeconds($gmailToken['expires_in']),
             ]
         )
         );

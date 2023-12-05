@@ -8,6 +8,8 @@ use Google\Service\Calendar as Google_Service_Calendar;
 use Google_Client;
 use Google_Service_Gmail;
 use Http;
+use Illuminate\Support\Facades\Log;
+
 
 class GmailTokenService extends BaseService
 {
@@ -49,7 +51,7 @@ class GmailTokenService extends BaseService
         ]);
 
         $responseData = $response->json();
-
+        Log::error('haha ' . env('GOOGLE_CLIENT_ID'));
         return [
             'access_token' => $responseData['access_token'],
             'expires_in' => $responseData['expires_in'],
@@ -107,6 +109,7 @@ class GmailTokenService extends BaseService
 
             return true;
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return $e->getMessage();
         }
     }

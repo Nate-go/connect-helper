@@ -25,4 +25,9 @@ class EmailSchedule extends Model
     {
         return $this->belongsTo(SendMail::class);
     }
+
+    public function user() : BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

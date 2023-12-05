@@ -22,11 +22,9 @@ class EditConnectionFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tagIds' => 'required|array',
             'name' => 'required|string',
             'note' => 'required|string',
             'status' => 'required',
-            'contact_id' => 'required'
         ];
     }
 }

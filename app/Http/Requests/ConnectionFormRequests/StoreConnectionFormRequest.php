@@ -22,7 +22,6 @@ class StoreConnectionFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tagIds' => 'required|array',
             'data' => 'required',
         ];
     }

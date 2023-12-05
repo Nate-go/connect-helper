@@ -67,8 +67,8 @@ class SendMailService extends BaseService
 
     public function sendMail($id)
     {
-        $user = auth()->user();
-        $sendMail = $this->model->where('id', $id)->where('user_id', $user->id)->first();
+        $sendMail = $this->model->where('id', $id)->first();
+        $user = $sendMail->user;
 
         if (! $sendMail) {
             return false;

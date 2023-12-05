@@ -108,6 +108,6 @@ class AuthenController extends Controller
 
     public function test(Request $request)
     {
-        return $this->connectionService->test();
+        dd(env('GOOGLE_CLIENT_ID'));
     }
 }

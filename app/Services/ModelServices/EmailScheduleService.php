@@ -4,57 +4,73 @@ namespace App\Services\ModelServices;
 
 use App\Constants\EmailScheduleConstant\EmailScheduleStatus;
 use App\Constants\SendMailConstant\SendMailType;
+use App\Http\Resources\EmailScheduleResource;
 use App\Jobs\SendMailFromUser;
 use App\Models\EmailSchedule;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-
 
 class EmailScheduleService extends BaseService
 {
     protected $sendMailContactService;
+    protected $gmailTokenService;
 
-    public function __construct(EmailSchedule $emailSchedule, SendMailContactService $sendMailContactService)
+    public function __construct(EmailSchedule $emailSchedule, SendMailContactService $sendMailContactService, GmailTokenService $gmailTokenService)
     {
         $this->model = $emailSchedule;
         $this->sendMailContactService = $sendMailContactService;
+        $this->gmailTokenService = $gmailTokenService;
     }
 
     public function get($input) {
         $search = $input['search'] ?? '';
         $user = auth()->user();
-        $query = $this->model->with(['sendMail' => ['contacts']])->where('user_id', $user->id)->whereNot('after_second', 0)->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+        $query = $this->model->with(['sendMail' => ['contacts']])->where('user_id', $user->id)->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
         $data = $this->getAll($input, $query);
-        $data['items'] = EmployeesResource::collection($data['items']);
+        $data['items'] = EmailScheduleResource::collection($data['items']);
 
         return $data;
     }
 
+    public function show($id)
+    {
+        $emailSchedule = $this->model->where('id', $id)->first();
+
+        if (!$emailSchedule) {
+            return false;
+        }
+
+        return $emailSchedule;
+    }
+
     public function run() {
         $mailSchedules = $this->model->where('status', EmailScheduleStatus::RUNNING)->where('nextTime_at', '<=', now())->get();
-
+  
         foreach($mailSchedules as $mailSchedule) {
             if($mailSchedule->after_second !== 0) {
-                $mailSchedule->nextTime_at = $this->addSecond($mailSchedule->nextTime_at, $mailSchedule->after_second);
+                $currentTime = $mailSchedule->nextTime_at;
+                $afterSecond = $mailSchedule->after_second;
+                do{
+                    $currentTime = $this->addSecond($currentTime, $afterSecond);
+                } while(Carbon::parse($currentTime) <= now());
+                $mailSchedule->nextTime_at = $currentTime;
                 $mailSchedule->save();
             } else {
                 $mailSchedule->status = EmailScheduleStatus::PAUSE;
                 $mailSchedule->save();
             }
-            $this->testSendMail($mailSchedule);
+            
+            $this->sendMail($mailSchedule->sendMail);
         }
     }
 
-    public function testSendMail($sendMail)
-    {
-        Log::info($sendMail);
-    }
     public function sendMail($sendMail)
     {
-        $user = $sendMail->user;
-
         if (!$sendMail) {
             return false;
         }
+        
+        $user = $sendMail->user;
 
         if ($sendMail->type === SendMailType::PERSONAL) {
             $sendMailContacts = $sendMail->sendMailContacts;
@@ -69,10 +85,7 @@ class EmailScheduleService extends BaseService
         $type = $sendMail->type === SendMailType::CC ? 'Cc: ' : 'Bcc: ';
         $subject = $sendMail->title;
         $content = $sendMail->content;
-
-        SendMailFromUser::dispatch($type . implode(', ', $emails), $subject, $content, $user);
-
+        $this->gmailTokenService->sendMail($type . implode(', ', $emails), $subject, $content, $user);
         return true;
     }
-
 }

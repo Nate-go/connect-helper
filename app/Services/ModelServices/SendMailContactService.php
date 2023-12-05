@@ -43,17 +43,16 @@ class SendMailContactService extends BaseService
     public function sendMail($id)
     {
         $sendMailContact = $this->model->where('id', $id)->first();
-
-        if (! $sendMailContact) {
+        if (!$sendMailContact) {
             return false;
         }
+        $user = $sendMailContact->sendMail->user;
 
         $contact = $sendMailContact->contact;
 
         $type = 'To: '.$contact->content;
         $subject = $sendMailContact->title;
         $content = $sendMailContact->content;
-
-        SendMailFromUser::dispatch($type, $subject, $content, auth()->user());
+        SendMailFromUser::dispatch($type, $subject, $content, $user);
     }
 }
