@@ -2,11 +2,8 @@
 
 namespace App\Services\ModelServices;
 
-use App\Constants\ConnectionConstant\ConnectionStatus;
-use App\Constants\UserConstant\UserRole;
 use App\Constants\UserConstant\UserStatus;
 use App\Http\Resources\EmployeesResource;
-use App\Jobs\SendMailFromUser;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
@@ -30,13 +27,6 @@ class UserService extends BaseService
         $data['items'] = EmployeesResource::collection($data['items']);
 
         return $data;
-    }
-
-    public function getAllOwner()
-    {
-        $owners = User::whereNot('role', UserRole::ADMIN)->get();
-
-        return $owners;
     }
 
     public function isEmailExist($email)

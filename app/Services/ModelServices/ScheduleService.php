@@ -6,7 +6,6 @@ use App\Constants\ScheduleConstant\ScheduleClassification;
 use App\Constants\ScheduleConstant\ScheduleStatus;
 use App\Constants\ScheduleConstant\ScheduleType;
 use App\Http\Resources\ScheduleResource;
-use App\Jobs\SendMailFromUser;
 use App\Models\Schedule;
 use App\Models\ScheduleContact;
 use App\Models\ScheduleUser;
@@ -16,7 +15,6 @@ use Google\Service\Calendar\CreateConferenceRequest as Google_Service_Calendar_C
 use Google\Service\Calendar\EventReminders as Google_Service_Calendar_EventReminders;
 use Google_Service_Calendar_Event;
 use Google_Service_Calendar_EventReminder;
-use Google_Service_Exception;
 use View;
 
 class ScheduleService extends BaseService
@@ -52,10 +50,6 @@ class ScheduleService extends BaseService
         $contactIds = $input['contactIds'];
 
         $schedule = $this->create($input);
-
-        if (! $schedule) {
-            return false;
-        }
 
         foreach ($userIds as $userId) {
             ScheduleUser::create([
@@ -158,7 +152,9 @@ class ScheduleService extends BaseService
 
         $type = 'Cc: '.implode(', ', $emails);
 
-        SendMailFromUser::dispatch($type, $subject, $content, $user);
+        $this->addMailToQueue($type, $subject, $content, $user);
+
+        return true;
     }
 
     public function createSchedule($schedule, $emails)
@@ -213,16 +209,13 @@ class ScheduleService extends BaseService
 
         $calendarId = 'primary';
 
-        try {
-            $createEvent = $service->events->insert($calendarId, $event, ['conferenceDataVersion' => 1]);
-            if ($autoCreateMeeting) {
-                $meetingLink = $createEvent->getHangoutLink();
-                $schedule->place = $meetingLink;
-                $schedule->save();
-            }
-
-        } catch (Google_Service_Exception $e) {
-            return $e->getMessage();
+        $createEvent = $service->events->insert($calendarId, $event, ['conferenceDataVersion' => 1]);
+        if ($autoCreateMeeting) {
+            $meetingLink = $createEvent->getHangoutLink();
+            $schedule->place = $meetingLink;
+            $schedule->save();
         }
+
+        return true;
     }
 }

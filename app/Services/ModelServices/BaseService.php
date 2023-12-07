@@ -24,13 +24,7 @@ class BaseService
 
     public function update($ids, $data)
     {
-        try {
-            $this->model->whereIn('id', $ids)->update($data);
-        } catch (\Exception $e) {
-            return false;
-        }
-
-        return true;
+        return $this->model->whereIn('id', $ids)->update($data);
     }
 
     public function delete($ids)
@@ -118,21 +112,31 @@ class BaseService
 
     }
 
-    public function addSecond($date, $seconds) {
-        if(is_string($date)) {
+    public function addSecond($date, $seconds)
+    {
+        if (is_string($date)) {
             $date = $this->getDate($date);
         }
         $date->addSeconds($seconds);
+
         return str_replace(' ', 'T', $date->toDateTimeString());
     }
 
-    public function getDate($dateString) {
+    public function getDate($dateString)
+    {
         $dateString = str_replace(' ', 'T', $dateString);
         $date = Carbon::parse($dateString);
+
         return $date;
     }
 
-    public function addMailToQueue($type, $subject, $content, $user) {
+    public function addMailToQueue($type, $subject, $content, $user)
+    {
         SendMailFromUser::dispatch($type, $subject, $content, $user);
+    }
+
+    public function getBy($column, $data)
+    {
+        return $this->model->where($column, $data)->first();
     }
 }

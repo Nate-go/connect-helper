@@ -2,12 +2,6 @@
 
 namespace Tests\Unit\Services\BusinessService\AuthenServiceTest;
 
-use App\Services\BusinessServices\AuthenService;
-use App\Services\ModelServices\ConnectionService;
-use App\Services\ModelServices\EnterpriseService;
-use App\Services\ModelServices\GmailTokenService;
-use App\Services\ModelServices\UserService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Unit\BaseTest;
 
 class BaseAuthenServiceTest extends BaseTest
@@ -17,9 +11,10 @@ class BaseAuthenServiceTest extends BaseTest
         parent::setUp();
     }
 
-    protected function getContructData() {
+    protected function getContructData()
+    {
         return [
-            
+
         ];
     }
 }

@@ -22,6 +22,8 @@ class TagService extends BaseService
                 'name' => $tag,
             ]);
         }
+
+        return true;
     }
 
     public function getAllTags()
@@ -43,21 +45,21 @@ class TagService extends BaseService
     public function create($data)
     {
         $name = $data['name'];
-
-        $tag = $this->model->where('name', $name)->first();
+        $user = auth()->user();
+        $tag = $this->model->where('name', $name)->where('user_id', $user->id)->first();
 
         if ($tag) {
-            return null;
+            return false;
         }
 
-        return parent::create(array_merge($data, ['user_id' => auth()->user()->id]));
+        return parent::create(array_merge($data, ['user_id' => $user->id]));
     }
 
     public function detail($id)
     {
         $tag = $this->model->where('id', $id)->first();
         if (! $tag) {
-            return null;
+            return false;
         }
 
         return [

@@ -17,8 +17,9 @@ class EmailScheduleResource extends JsonResource
             'after_second' => $this->after_second,
             'nextTime_at' => $this->nextTime_at,
             'sendMail' => $this->sendMail,
-            'contacts' => $this->sendMail->contacts
+            'contacts' => $this->sendMail->contacts,
         ];
+
         return $data;
     }
 }

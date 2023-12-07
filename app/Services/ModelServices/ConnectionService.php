@@ -10,15 +10,7 @@ use App\Http\Resources\ShowConnectionResource;
 use App\Models\Connection;
 use App\Models\ConnectionTag;
 use App\Models\ConnectionUser;
-use App\Models\Schedule;
 use App\Models\User;
-use Google\Service\Calendar\ConferenceData as Google_Service_Calendar_ConferenceData;
-use Google\Service\Calendar\ConferenceSolutionKey as Google_Service_Calendar_ConferenceSolutionKey;
-use Google\Service\Calendar\CreateConferenceRequest as Google_Service_Calendar_CreateConferenceRequest;
-use Google\Service\Calendar\EventReminders as Google_Service_Calendar_EventReminders;
-use Google_Service_Calendar_Event;
-use Google_Service_Calendar_EventReminder;
-use Google_Service_Exception;
 
 class ConnectionService extends BaseService
 {
@@ -50,7 +42,7 @@ class ConnectionService extends BaseService
         $statuses = $input['statuses'] ?? [];
         $search = $input['search'] ?? '';
         $user = auth()->user();
-        $query = $this->model->with(['tags' => function($query) use($user) {
+        $query = $this->model->with(['tags' => function ($query) use ($user) {
             $query->where('user_id', $user->id);
         }, 'users', 'user'])->enterpriseConnection()->where('name', 'LIKE', '%'.$search.'%')->tagFilter($tags)->statusFilter($statuses);
         $data = $this->getAll($input, $query);
@@ -65,6 +57,8 @@ class ConnectionService extends BaseService
             'user_id' => $userId,
             'connection_id' => $connectionId,
         ]);
+
+        return true;
     }
 
     public function update($ids, $data)
@@ -148,7 +142,7 @@ class ConnectionService extends BaseService
         ]);
 
         $connection->update([
-            'contact_id' => $contact->id
+            'contact_id' => $contact->id,
         ]);
 
         $this->createConnectionUser($user->id, $connection->id);
@@ -234,6 +228,8 @@ class ConnectionService extends BaseService
                 $this->connectionHistoryService->setUp($user, $mailContact, $service);
             }
         }
+
+        return true;
     }
 
     public function createConnection($input)
@@ -248,10 +244,6 @@ class ConnectionService extends BaseService
                 'enterprise_id' => auth()->user()->enterprise_id,
             ]
         ));
-
-        if (! $connection) {
-            return false;
-        }
 
         $this->createConnectionUser(auth()->user()->id, $connection->id);
 
@@ -279,20 +271,12 @@ class ConnectionService extends BaseService
             return false;
         }
 
-        $name = $input['name'];
-        $note = $input['note'];
         $ownerId = $input['ownerId'];
-        $status = $input['status'];
         $tagIds = $input['tagIds'];
-        $contact_id = $input['contact_id'];
 
-        $connection->update([
-            'name' => $name,
-            'note' => $note,
-            'status' => $status,
+        $connection->update(array_merge($input, [
             'user_id' => $ownerId,
-            'contact_id' => $contact_id
-        ]);
+        ]));
 
         $currentTagIds = $connection->tags()->pluck('tags.id')->toArray();
         $this->deleteTagsToConnections(array_diff($currentTagIds, $tagIds), [$id]);
@@ -304,8 +288,8 @@ class ConnectionService extends BaseService
     public function getContacts($connectionId)
     {
         $connection = $this->model->with(['histories' => [
-            'contact', 
-            'user'
+            'contact',
+            'user',
         ], 'contacts'])->where('id', $connectionId)->first();
 
         if (! $connection) {
@@ -357,81 +341,9 @@ class ConnectionService extends BaseService
                 'name' => $connection->name,
                 'note' => $connection->note,
                 'contacts' => $connection->mailContacts,
-                'contact_id' => $connection->contact_id
+                'contact_id' => $connection->contact_id,
             ];
         });
-    }
-
-    public function test()
-    {
-        $user = User::where('id', 1)->first();
-        $service = $this->gmailTokenService->getCalendarService($user);
-        $schedule = Schedule::where('id', 1)->first();
-        $emails = ['xayvier01@gmail.com'];
-        $newEmail = [];
-        foreach ($emails as $email) {
-            $newEmail[] = [
-                'email' => $email,
-            ];
-        }
-        $conference = new Google_Service_Calendar_ConferenceData();
-        $conferenceRequest = new Google_Service_Calendar_CreateConferenceRequest();
-        $conferenceSolutionKey = new Google_Service_Calendar_ConferenceSolutionKey();
-        $conferenceSolutionKey->setType('hangoutsMeet');
-        $conferenceRequest->setRequestId($user->email.time());
-        $conferenceRequest->setConferenceSolutionKey($conferenceSolutionKey);
-        $conference->setCreateRequest($conferenceRequest);
-
-        $reminder = new Google_Service_Calendar_EventReminder();
-        $reminder->setMethod('email');
-        $reminder->setMinutes(30);
-
-        $reminders = new Google_Service_Calendar_EventReminders();
-        $reminders->setUseDefault(false);
-        $reminders->setOverrides([$reminder]);
-
-        return json_encode([
-            'summary' => $schedule->title,
-            'description' => $schedule->content,
-            'start' => [
-                'dateTime' => $this->customDate($schedule->started_at),
-                'timeZone' => 'Asia/Ho_Chi_Minh',
-            ],
-            'end' => [
-                'dateTime' => $this->customDate($schedule->finished_at),
-                'timeZone' => 'Asia/Ho_Chi_Minh',
-            ],
-            'attendees' => $newEmail,
-            'conferenceData' => $conference,
-        ]);
-
-        $event = new Google_Service_Calendar_Event([
-            'summary' => $schedule->title,
-            'description' => $schedule->content,
-            'start' => [
-                'dateTime' => $this->customDate($schedule->started_at),
-                'timeZone' => 'Asia/Ho_Chi_Minh',
-            ],
-            'end' => [
-                'dateTime' => $this->customDate($schedule->finished_at),
-                'timeZone' => 'Asia/Ho_Chi_Minh',
-            ],
-            'attendees' => $newEmail,
-            'conferenceData' => $conference,
-        ]);
-
-        $event->setReminders($reminders);
-
-        $calendarId = 'primary';
-
-        try {
-            $createEvent = $service->events->insert($calendarId, $event, ['conferenceDataVersion' => 1]);
-            $meetingLink = $createEvent->getHangoutLink();
-
-            return $meetingLink;
-        } catch (Google_Service_Exception $e) {
-            return $e->getMessage();
-        }
     }
 
     public function delete($ids)

@@ -10,7 +10,6 @@ use App\Constants\UserConstant\UserVerifyTime;
 use App\Http\Resources\UserInformation;
 use App\Jobs\SendMailQueue;
 use App\Jobs\SetupDataForUser;
-use App\Models\User;
 use App\Services\ModelServices\ConnectionService;
 use App\Services\ModelServices\EnterpriseService;
 use App\Services\ModelServices\GmailTokenService;
@@ -43,12 +42,29 @@ class AuthenService
         $this->connectionService = $connectionService;
     }
 
-    public function response($data, $status) {
+    public function response($data, $status)
+    {
         return response()->json($data, $status);
     }
 
-    public function authenCreadentials($credentials) {
+    public function authenCreadentials($credentials)
+    {
         return auth()->attempt($credentials);
+    }
+
+    public function hash($data)
+    {
+        return Hash::make($data);
+    }
+
+    public function setUpUser($user)
+    {
+        SetupDataForUser::dispatch($user);
+    }
+
+    public function sendMailQueue($user)
+    {
+        SendMailQueue::dispatch($user);
     }
 
     public function login($input)
@@ -115,7 +131,7 @@ class AuthenService
             'enterprise_id' => $enterprise->id,
             'email' => $data['email'],
             'name' => $input['name'],
-            'password' => Hash::make($input['password']),
+            'password' => $this->hash($input['password']),
             'role' => UserRole::OWNER,
             'status' => UserStatus::ACTIVE,
             'image_url' => $data['picture'],
@@ -127,10 +143,9 @@ class AuthenService
                 'user_id' => $user->id,
                 'expired_at' => now()->addSeconds($gmailToken['expires_in']),
             ]
-        )
-        );
+        ));
 
-        SetupDataForUser::dispatch($user);
+        $this->setUpUser($user);
 
         return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
@@ -161,7 +176,7 @@ class AuthenService
             'enterprise_id' => $enterpriseId,
             'email' => $data['email'],
             'name' => $input['name'],
-            'password' => Hash::make($input['password']),
+            'password' => $this->hash($input['password']),
             'role' => UserRole::EMPLOYEE,
             'status' => UserStatus::ACTIVE,
             'image_url' => $data['picture'],
@@ -177,7 +192,7 @@ class AuthenService
             )
         );
 
-        SetupDataForUser::dispatch($user);
+        $this->setUpUser($user);
 
         return $this->response([
             'message' => $user ? 'User successfully registered' : 'User fail registered',
@@ -199,12 +214,12 @@ class AuthenService
     {
         $dataToEncode = $startTime.'|'.$endTime.'|'.$userData;
 
-        return Hash::make($dataToEncode);
+        return $this->hash($dataToEncode);
     }
 
     public function createVerify($email)
     {
-        $user = User::where('email', $email)->first();
+        $user = $this->userService->getBy('email', $email);
 
         if (! $user) {
             return null;
@@ -220,7 +235,7 @@ class AuthenService
         $verify->deleted_at = null;
         $verify->save();
 
-        SendMailQueue::dispatch($user);
+        $this->sendMailQueue($user);
 
         return $verify->verify_code;
     }
@@ -240,13 +255,6 @@ class AuthenService
         ], StatusResponse::SUCCESS);
     }
 
-    public function logout()
-    {
-        auth()->logout();
-
-        return $this->response(['message' => 'User successfully signed out'], StatusResponse::SUCCESS);
-    }
-
     public function throwAuthenError()
     {
         return $this->response(['message' => 'You need to login to access'], StatusResponse::UNAUTHORIZED);
@@ -259,7 +267,7 @@ class AuthenService
 
     public function refresh($rememberToken)
     {
-        $user = User::where('remember_token', $rememberToken)->first();
+        $user = $this->userService->getBy('remember_token', $rememberToken);
 
         if (! $user) {
             return false;
@@ -301,71 +309,6 @@ class AuthenService
             'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => json_decode(json_encode(new UserInformation(auth()->user()))),
         ], StatusResponse::SUCCESS);
-    }
-
-    public function activeAccount($input)
-    {
-        $email = $input['email'];
-        $verify_code = $input['verify_code'];
-
-        $user = User::where('email', $email)
-            ->where('status', UserStatus::DEACTIVE)
-            ->first();
-
-        $result = $this->checkVerifyAccount($user, $verify_code);
-
-        if ($result) {
-            return $result;
-        }
-
-        $user->status = UserStatus::ACTIVE;
-        $user->account_verify->delete();
-        $user->save();
-
-        return $this->response([
-            'message' => 'Activate account successfully',
-        ], StatusResponse::SUCCESS);
-    }
-
-    public function resetPassword($input)
-    {
-        $verify_code = $input['verify_code'];
-        $newPassword = $input['new_password'];
-
-        $user = auth()->user();
-
-        $result = $this->checkVerifyAccount($user, $verify_code);
-
-        if ($result) {
-            return $result;
-        }
-
-        $user->password = bcrypt($newPassword);
-        $user->account_verify->delete();
-        $user->save();
-
-        return $this->response([
-            'message' => 'Change password successfully',
-        ], StatusResponse::SUCCESS);
-    }
-
-    public function checkVerifyAccount($user, $verify_code)
-    {
-        if (! $user) {
-            return $this->response([
-                'message' => 'Can not find user or user is already active',
-            ], StatusResponse::ERROR);
-        }
-
-        $accountVerify = $user->account_verify;
-
-        if (! $accountVerify or $accountVerify->overtimed_at < now() or $accountVerify->verify_code != $verify_code) {
-            return $this->response([
-                'message' => 'Your verify code is invalid',
-            ], StatusResponse::ERROR);
-        }
-
-        return null;
     }
 
     public function checkInviteToken($token)

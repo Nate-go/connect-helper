@@ -58,7 +58,7 @@ class TemplateGroupService extends BaseService
     public function setUp($user)
     {
         if ($user->role !== UserRole::OWNER) {
-            return;
+            return false;
         }
 
         $templateGroups = DefaultTemplate::TEMPLATE_GROUPS;
@@ -83,5 +83,6 @@ class TemplateGroupService extends BaseService
             }
         }
 
+        return true;
     }
 }

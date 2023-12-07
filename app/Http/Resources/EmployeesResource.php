@@ -13,11 +13,12 @@ class EmployeesResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'image_url' =>$this->image_url,
-            'phonenumber' =>$this->phonenumber,
+            'image_url' => $this->image_url,
+            'phonenumber' => $this->phonenumber,
             'gender' => $this->gender,
-            'date_of_birth' => $this->date_of_birth
+            'date_of_birth' => $this->date_of_birth,
         ];
+
         return $data;
     }
 }

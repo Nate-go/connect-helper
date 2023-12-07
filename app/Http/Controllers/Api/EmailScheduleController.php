@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Constants\AuthenConstant\StatusResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ContactFormRequests\StoreContactFormRequest;
-use App\Services\ModelServices\ContactService;
 use App\Services\ModelServices\EmailScheduleService;
 use Illuminate\Http\Request;
 
@@ -30,7 +28,7 @@ class EmailScheduleController extends Controller
     public function show(string $id)
     {
         $result = $this->emailScheduleService->show($id);
-        if (!$result) {
+        if (! $result) {
             return response()->json([
                 'message' => 'Can not find out this schedule mail',
             ], StatusResponse::ERROR);

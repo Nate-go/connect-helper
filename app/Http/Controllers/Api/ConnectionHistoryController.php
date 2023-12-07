@@ -23,13 +23,4 @@ class ConnectionHistoryController extends Controller
             'message' => $result ? 'Update connection history successfull' : 'Update connection history fail',
         ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
     }
-
-    public function updateUserConnection()
-    {
-        $result = $this->connectionHistoryService->updateUserHistories(auth()->user());
-
-        return response()->json([
-            'message' => $result ? 'Update all your connection history successfull' : 'Update all your connection history fail',
-        ], $result ? StatusResponse::SUCCESS : StatusResponse::ERROR);
-    }
 }

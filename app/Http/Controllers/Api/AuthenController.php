@@ -10,7 +10,6 @@ use App\Http\Requests\AuthenFormRequests\RefreshFormRequest;
 use App\Http\Requests\AuthenFormRequests\SendVerifyFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpEmployeeFormRequest;
 use App\Http\Requests\AuthenFormRequests\SignUpFormRequest;
-use App\Http\Requests\AuthenFormRequests\VerifyAccountFormRequest;
 use App\Services\BusinessServices\AuthenService;
 use App\Services\ModelServices\ConnectionService;
 use Illuminate\Http\Request;
@@ -40,11 +39,6 @@ class AuthenController extends Controller
     public function signupEmployee(SignUpEmployeeFormRequest $request)
     {
         return $this->authenService->signupEmployee($request->all());
-    }
-
-    public function logout()
-    {
-        return $this->authenService->logout();
     }
 
     public function throwAuthenError()
@@ -87,11 +81,6 @@ class AuthenController extends Controller
     public function sendVerify(SendVerifyFormRequest $request)
     {
         return $this->authenService->sendVerify($request->all());
-    }
-
-    public function activeAccount(VerifyAccountFormRequest $request)
-    {
-        return $this->authenService->activeAccount($request->all());
     }
 
     public function checkInviteToken(Request $request)

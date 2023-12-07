@@ -105,20 +105,15 @@ class ConnectionHistoryService extends BaseService
         foreach ($users as $user) {
             $service = $this->gmailTokenService->getGmailService($user);
             foreach ($mailContacts as $mailContact) {
-                UpdateHistory::dispatch($user, $mailContact, $service);
+                $this->updateHistory($user, $mailContact, $service);
             }
         }
 
         return true;
     }
 
-    public function updateUserHistories($user)
+    public function updateHistory($user, $mailContact, $service)
     {
-        $connections = $user->connections;
-        foreach ($connections as $connection) {
-            $this->updateConnectionHistories($connection);
-        }
-
-        return true;
+        UpdateHistory::dispatch($user, $mailContact, $service);
     }
 }

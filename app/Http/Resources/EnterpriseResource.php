@@ -10,10 +10,10 @@ class EnterpriseResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $owner = $this->users->first(function($user) {
+        $owner = $this->users->first(function ($user) {
             return $user->role === UserRole::OWNER;
         });
-        
+
         $data = [
             'id' => $this->id,
             'name' => $this->name,

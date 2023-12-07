@@ -8,8 +8,6 @@ use Google\Service\Calendar as Google_Service_Calendar;
 use Google_Client;
 use Google_Service_Gmail;
 use Http;
-use Illuminate\Support\Facades\Log;
-
 
 class GmailTokenService extends BaseService
 {
@@ -18,13 +16,12 @@ class GmailTokenService extends BaseService
         $this->model = $gmailToken;
     }
 
-    private function getAccessToken($user)
+    public function getAccessToken($user)
     {
         if (is_numeric($user)) {
             $user = User::where('id', $user)->first();
         }
 
-        $accessToken = $user->gmailToken->access_token;
         $expiredAt = $user->gmailToken->expired_at;
 
         if (now() >= $expiredAt) {
@@ -38,10 +35,10 @@ class GmailTokenService extends BaseService
             return $newAccessToken['access_token'];
         }
 
-        return $accessToken;
+        return $user->gmailToken->access_token;
     }
 
-    private function refreshAccessToken($refreshToken)
+    public function refreshAccessToken($refreshToken)
     {
         $response = Http::post('https://oauth2.googleapis.com/token', [
             'client_id' => env('GOOGLE_CLIENT_ID'),
@@ -51,7 +48,7 @@ class GmailTokenService extends BaseService
         ]);
 
         $responseData = $response->json();
-        Log::error('haha ' . env('GOOGLE_CLIENT_ID'));
+
         return [
             'access_token' => $responseData['access_token'],
             'expires_in' => $responseData['expires_in'],
@@ -104,13 +101,8 @@ class GmailTokenService extends BaseService
 
         $encodedMessage = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
 
-        try {
-            $service->users_messages->send('me', new \Google_Service_Gmail_Message(['raw' => $encodedMessage]));
+        $service->users_messages->send('me', new \Google_Service_Gmail_Message(['raw' => $encodedMessage]));
 
-            return true;
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return $e->getMessage();
-        }
+        return true;
     }
 }

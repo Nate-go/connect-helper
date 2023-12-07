@@ -4,7 +4,6 @@ namespace App\Services\ModelServices;
 
 use App\Constants\EmailScheduleConstant\EmailScheduleStatus;
 use App\Constants\SendMailConstant\SendMailType;
-use App\Jobs\SendMailFromUser;
 use App\Models\SendMail;
 
 class SendMailService extends BaseService
@@ -31,10 +30,6 @@ class SendMailService extends BaseService
             'type' => $input['type'],
         ]);
 
-        if (! $sendMail) {
-            return false;
-        }
-
         $contactIds = $input['contactIds'];
 
         foreach ($contactIds as $contactId) {
@@ -48,7 +43,7 @@ class SendMailService extends BaseService
         }
 
         $schedule = $input['schedule'] ?? null;
-        if($schedule) {
+        if ($schedule) {
             $this->emailScheduleService->create([
                 'user_id' => $user->id,
                 'send_mail_id' => $sendMail->id,
@@ -56,7 +51,7 @@ class SendMailService extends BaseService
                 'nextTime_at' => $input['schedule']['started_at'],
                 'after_second' => $input['schedule']['after_second'],
                 'status' => EmailScheduleStatus::RUNNING,
-                'name' => $sendMail->name
+                'name' => $sendMail->name,
             ]);
         } else {
             $this->sendMail($sendMail->id);
@@ -68,11 +63,12 @@ class SendMailService extends BaseService
     public function sendMail($id)
     {
         $sendMail = $this->model->where('id', $id)->first();
-        $user = $sendMail->user;
 
         if (! $sendMail) {
             return false;
         }
+
+        $user = $sendMail->user;
 
         if ($sendMail->type === SendMailType::PERSONAL) {
             $sendMailContacts = $sendMail->sendMailContacts;
@@ -88,7 +84,7 @@ class SendMailService extends BaseService
         $subject = $sendMail->title;
         $content = $sendMail->content;
 
-        SendMailFromUser::dispatch($type.implode(', ', $emails), $subject, $content, $user);
+        $this->addMailToQueue($type.implode(', ', $emails), $subject, $content, $user);
 
         return true;
     }

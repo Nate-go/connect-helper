@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\EmailSchedule;
 use App\Services\ModelServices\EmailScheduleService;
 use Illuminate\Console\Command;
 

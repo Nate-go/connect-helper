@@ -2,7 +2,6 @@
 
 namespace App\Services\ModelServices;
 
-use App\Jobs\SendMailFromUser;
 use App\Models\Contact;
 use App\Models\SendMailContact;
 
@@ -43,7 +42,7 @@ class SendMailContactService extends BaseService
     public function sendMail($id)
     {
         $sendMailContact = $this->model->where('id', $id)->first();
-        if (!$sendMailContact) {
+        if (! $sendMailContact) {
             return false;
         }
         $user = $sendMailContact->sendMail->user;
@@ -53,6 +52,8 @@ class SendMailContactService extends BaseService
         $type = 'To: '.$contact->content;
         $subject = $sendMailContact->title;
         $content = $sendMailContact->content;
-        SendMailFromUser::dispatch($type, $subject, $content, $user);
+        $this->addMailToQueue($type, $subject, $content, $user);
+
+        return true;
     }
 }

@@ -24,7 +24,7 @@ class SendMailContact extends Model
         return $this->belongsTo(Contact::class);
     }
 
-    public function sendMail() : BelongsTo
+    public function sendMail(): BelongsTo
     {
         return $this->belongsTo(SendMail::class);
     }

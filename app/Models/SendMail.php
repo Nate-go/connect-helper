@@ -31,7 +31,7 @@ class SendMail extends Model
         return $this->hasMany(SendMailContact::class);
     }
 
-    public function user():BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
